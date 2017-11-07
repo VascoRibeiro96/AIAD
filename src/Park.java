@@ -46,8 +46,8 @@ public class Park extends Agent {
             if(spots != 0){
                 reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
                 reply.setContent("success");
-                System.out.println("Oh yee parked! Current space " + spots);
                 spots--;
+                System.out.println("Oh yee parked! Current space " + spots);
             }
             else{
                 reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
@@ -63,6 +63,7 @@ public class Park extends Agent {
             ACLMessage reply = msg.createReply();
             // preenche conteudo da mensagem
             String answer = name + " " + price + " " + spots;
+            System.out.println("Sent " + answer);
             reply.setContent(answer);
             // envia mensagem
             send(reply);
