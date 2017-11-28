@@ -12,6 +12,7 @@ public class Park extends Agent {
     private String name;
     private double price;
     private int spots;
+    private String type;
     private ArrayList<Integer> spotStory;
     //TODO something else right
 
@@ -95,7 +96,7 @@ public class Park extends Agent {
         dfd.setName(getAID());
         ServiceDescription sd = new ServiceDescription();
         sd.setName(getName());
-        sd.setType("Agent " + type);
+        sd.setType("Agente Park");
         dfd.addServices(sd);
         try {
             DFService.register(this, dfd);
