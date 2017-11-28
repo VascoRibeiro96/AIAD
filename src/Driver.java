@@ -23,9 +23,42 @@ public class Driver extends Agent {
         public boolean done(){return end;}
     }
 
-    protected void setup(){
+    protected void setup() {
 
-    }
+        // regista agente no DF
+        DFAgentDescription dfd = new DFAgentDescription();
+        dfd.setName(getAID());
+        ServiceDescription sd = new ServiceDescription();
+        sd.setName(getName());
+        sd.setType("Agente park");
+        dfd.addServices(sd);
+        try {
+            DFService.register(this, dfd);
+        } catch(FIPAException e) {
+            e.printStackTrace();
+        }
+
+        // cria behaviour
+        Driver.DriverBehaviour b = new Driver.DriverBehaviour(this);
+        addBehaviour(b);
+
+
+        // pesquisa DF por agentes "ping"
+        DFAgentDescription template = new DFAgentDescription();
+        ServiceDescription sd1 = new ServiceDescription();
+        sd1.setType("Agente park");
+        template.addServices(sd1);
+        try {
+            DFAgentDescription[] result = DFService.search(this, template);
+            // envia mensagem "drive" inicial a todos os agentes "park"
+            ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+            for(int i=0; i<result.length; ++i)
+                msg.addReceiver(result[i].getName());
+            msg.setContent("drive");
+            send(msg);
+        } catch(FIPAException e) { e.printStackTrace(); }
+
+    }   // fim do metodo setup
 
     protected void takeDown(){
         try {
