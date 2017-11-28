@@ -14,6 +14,7 @@ public class Park extends Agent {
     private int spots;
     private String type;
     private ArrayList<Integer> spotStory;
+    private double x, y;
     //TODO something else right
 
     //ter logica do comportamento aqui?
@@ -77,13 +78,20 @@ public class Park extends Agent {
     }
 
     //tipos de parque = static & dynamic
-    //tem de ter 2 args tipo e nome (falta dp checkar para ñ haver nomes iguais)
+    //tem de ter 5 argumentos por esta ordem: tipo (static ou dynamic), preço, nº lugares, Latitude(ou y), Longitude(ou x)
     protected void setup() {
-        String type = "";
         Object[] args = getArguments();
-        if(args != null && args.length > 0) {
+        if(args != null && args.length == 5) {
             type = (String) args[0];
-            name = "lol";//(String) args[1];
+            name = getName();
+            price = Double.parseDouble((String) args[1]);
+            spots = Integer.parseInt((String) args[2]);
+            y = Double.parseDouble((String) args[3]);
+            x = Double.parseDouble((String) args[4]);
+
+        } else {
+            System.err.println("Missing Parameters!");
+            return;
         }
         if(type.equals("") || !(type.equals("static") || type.equals("dynamic"))){
             System.err.println("Introduced wrong type for park!");
@@ -104,7 +112,7 @@ public class Park extends Agent {
             e.printStackTrace();
         }
 
-        initVars();
+        getVars();
 
         // cria behaviour
         ParkBehaviour b = new ParkBehaviour(this);
@@ -113,10 +121,8 @@ public class Park extends Agent {
 
     }   // fim do metodo setup
 
-    private void initVars(){
-        price = 1;
-        spots = 20;
-        spotStory = new ArrayList<>();
+    private void getVars(){
+        System.out.println("New park created: " + name + " " + price + " " + spots + " y:" + y + " x:" + x);
     }
 
     //metodo takeDown
