@@ -30,7 +30,7 @@ public class Driver extends Agent {
         dfd.setName(getAID());
         ServiceDescription sd = new ServiceDescription();
         sd.setName(getName());
-        sd.setType("Agente park");
+        sd.setType("Agente driver");
         dfd.addServices(sd);
         try {
             DFService.register(this, dfd);
@@ -43,7 +43,7 @@ public class Driver extends Agent {
         addBehaviour(b);
 
 
-        // pesquisa DF por agentes "ping"
+        // pesquisa DF por agentes "park"
         DFAgentDescription template = new DFAgentDescription();
         ServiceDescription sd1 = new ServiceDescription();
         sd1.setType("Agente park");
@@ -54,7 +54,7 @@ public class Driver extends Agent {
             ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
             for(int i=0; i<result.length; ++i)
                 msg.addReceiver(result[i].getName());
-            msg.setContent("drive");
+            msg.setContent("driver");
             send(msg);
         } catch(FIPAException e) { e.printStackTrace(); }
 
