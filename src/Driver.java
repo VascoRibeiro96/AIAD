@@ -64,7 +64,7 @@ public class Driver extends Agent {
         try {
             DFService.deregister(this);
         } catch(FIPAException e){
-            e.printStackTree();
+            e.printStackTrace();
         }
     }
 }
