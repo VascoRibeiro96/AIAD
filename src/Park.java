@@ -5,6 +5,7 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
+import utils.Coords;
 
 import java.util.ArrayList;
 
@@ -14,8 +15,8 @@ public class Park extends Agent {
     private int spots;
     private String type;
     private ArrayList<Integer> spotStory;
-    private double x, y;
-    //TODO something else right
+    private Coords location;
+    //TODO something else right talvez horario de abertura e fecho?
 
     //ter logica do comportamento aqui?
     class ParkBehaviour extends SimpleBehaviour{
@@ -34,28 +35,29 @@ public class Park extends Agent {
                 System.out.println(getLocalName() + ": recebi " + msg.getContent());
                 if(msg.getContent().equals("info"))
                     sendInformation(msg);
-
+                else rejectMessage(msg);
             }
-            else if(msg.getPerformative() == ACLMessage.PROPOSE){
+            else if(msg.getPerformative() == ACLMessage.REQUEST){
                 System.out.println("A Driver wants to park :O");
-                //TODO precisa de check?
-                updateParking(msg);
+                if(msg.getContent().equals("park"))
+                    updateParking(msg);
             }
+            else rejectMessage(msg);
         }
 
         private void updateParking(ACLMessage msg){
             ACLMessage reply = msg.createReply();
             if(spots != 0){
-                reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
+                reply.setPerformative(ACLMessage.AGREE);
                 reply.setContent("success");
                 spots--;
                 System.out.println("Oh yee parked! Current space " + spots);
             }
             else{
-                reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
-                reply.setContent("no:(");
+                reply.setPerformative(ACLMessage.REFUSE);
+                reply.setContent("unavailable");
                 System.out.println("Park full!");
-                end = true;
+                end = true; // TODO temporario
             }
             send(reply);
         }
@@ -64,10 +66,19 @@ public class Park extends Agent {
             // cria resposta
             ACLMessage reply = msg.createReply();
             // preenche conteudo da mensagem
-            String answer = name + " " + price + " " + spots;
+            String answer = "retInfo," + name + "," + price + "," + location + "," + type;
             System.out.println("Sent " + answer);
             reply.setContent(answer);
             // envia mensagem
+            send(reply);
+        }
+
+        // mensagem default caso receba uma mensagem inesperada
+        private void rejectMessage(ACLMessage msg){
+            ACLMessage reply = msg.createReply();
+            msg.setPerformative(ACLMessage.UNKNOWN);
+            System.err.println("Received message with unexpected format");
+            reply.setContent("unexpected format");
             send(reply);
         }
 
@@ -77,8 +88,8 @@ public class Park extends Agent {
         }
     }
 
-    //tipos de parque = static & dynamic
-    //tem de ter 5 argumentos por esta ordem: tipo (static ou dynamic), preço, nº lugares, Latitude(ou y), Longitude(ou x)
+    // tem de ter 5 argumentos por esta ordem: tipo (static ou dynamic), preço, nº lugares, Longitude(ou x), Latitude(ou y)
+    // exemplo static, 10, 3, 49.3, 54.1
     protected void setup() {
         Object[] args = getArguments();
         if(args != null && args.length == 5) {
@@ -86,8 +97,10 @@ public class Park extends Agent {
             name = getName();
             price = Double.parseDouble((String) args[1]);
             spots = Integer.parseInt((String) args[2]);
-            y = Double.parseDouble((String) args[3]);
-            x = Double.parseDouble((String) args[4]);
+            double x = Double.parseDouble((String) args[3]);
+            double y = Double.parseDouble((String) args[4]);
+            location = new Coords(x,y);
+            spotStory = new ArrayList<>();
 
         } else {
             System.err.println("Missing Parameters!");
@@ -117,12 +130,10 @@ public class Park extends Agent {
         // cria behaviour
         ParkBehaviour b = new ParkBehaviour(this);
         addBehaviour(b);
-
-
     }   // fim do metodo setup
 
     private void getVars(){
-        System.out.println("New park created: " + name + " " + price + " " + spots + " y:" + y + " x:" + x);
+        System.out.println("New park created: " + name + " " + price + " " + spots + " " + location);
     }
 
     //metodo takeDown

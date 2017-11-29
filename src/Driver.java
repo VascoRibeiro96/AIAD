@@ -5,8 +5,25 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
+import utils.Coords;
+import utils.ParkInfo;
+
+import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Driver extends Agent {
+    private Coords start, dest;
+    private String name;
+    // tem tempo previsto de chegada mas ñ sei para que serve
+    private double maxMoney; // max money to pay per hour
+    private double maxDist; //|parkLocation-maxDist|
+    private double timePark, timeArrive; // acho que o timearrive ñ serve para nada
+    private double utility; // isto é o Ci (maxMoney*timePark+maxDist)
+    private ArrayList<ParkInfo> parkUtilities; // Ci - (alpha * price * time) - (beta - distance)
+    private ParkInfo bestPark = null;
+    private Object lock1 = new Object();
+    // TODO dp por variávies aleatórias para isto aqui em cima
 
     class DriverBehaviour extends SimpleBehaviour{
         private boolean end = false;
@@ -17,13 +34,69 @@ public class Driver extends Agent {
 
         @Override
         public void action(){
+            ACLMessage msg = blockingReceive();
+            if(msg.getPerformative() == ACLMessage.INFORM) {
+                System.out.println(getLocalName() + ": recebi " + msg.getContent());
+                if(msg.getContent().contains("retInfo,"))
+                    updateParkUtils(msg);
+                else rejectMessage(msg);
+            }
+            else rejectMessage(msg);
+        }
 
+        private void updateParkUtils(ACLMessage msg){
+            String[] values = msg.getContent().split(",");
+            String name = values[1];
+            double price = Double.parseDouble(values[2]);
+            double x = Double.parseDouble(values[3]);
+            double y = Double.parseDouble(values[4]);
+            String type = values[5];
+            ParkInfo p = new ParkInfo(name,type,price,x,y);
+            synchronized (lock1){ // evitar problemas de concurrencia. Funciona como um lock
+                if(bestPark == null || bestPark.utility < p.getUtility(utility,timePark,dest)){
+                    bestPark = p;
+                    System.out.println("New util best! " + bestPark.getUtility(utility,timePark,dest));
+                }
+                parkUtilities.add(p);
+            }
+        }
+
+        private void rejectMessage(ACLMessage msg){
+            ACLMessage reply = msg.createReply();
+            msg.setPerformative(ACLMessage.UNKNOWN);
+            System.err.println("Driver received message with unexpected format");
+            reply.setContent("unexpected format");
+            send(reply);
         }
 
         public boolean done(){return end;}
     }
 
+    private void initVariables(Object[] args){
+        name = getName();
+        double xi =Double.parseDouble((String) args[0]);
+        double yi =Double.parseDouble((String) args[1]);
+        double xf =Double.parseDouble((String) args[2]);
+        double yf =Double.parseDouble((String) args[3]);
+        start = new Coords(xi,yi);
+        dest = new Coords(xf,yf);
+        maxMoney =Double.parseDouble((String) args[4]);
+        maxDist =Double.parseDouble((String) args[5]);
+        timePark =Double.parseDouble((String) args[6]);
+        utility = timePark * maxMoney + maxDist;
+        parkUtilities = new ArrayList<>();
+    }
+
     protected void setup() {
+        Object[] args = getArguments();
+        // args: xi, yi, xf, yf, maxMoney, maxDist, timePark
+        // exemplo 49.3, 49.4, 65.12, 12.2, 25, 100, 2
+        if(args != null && args.length == 7) {
+            initVariables(args);
+        } else {
+            System.err.println("Missing Parameters!");
+            return;
+        }
 
         // regista agente no DF
         DFAgentDescription dfd = new DFAgentDescription();
@@ -42,11 +115,12 @@ public class Driver extends Agent {
         Driver.DriverBehaviour b = new Driver.DriverBehaviour(this);
         addBehaviour(b);
 
+        System.out.println("Driver " + name + " was created! Total util:" + utility);
 
         // pesquisa DF por agentes "park"
         DFAgentDescription template = new DFAgentDescription();
         ServiceDescription sd1 = new ServiceDescription();
-        sd1.setType("Agente park");
+        sd1.setType("Agente Park");
         template.addServices(sd1);
         try {
             DFAgentDescription[] result = DFService.search(this, template);
@@ -54,7 +128,7 @@ public class Driver extends Agent {
             ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
             for(int i=0; i<result.length; ++i)
                 msg.addReceiver(result[i].getName());
-            msg.setContent("driver");
+            msg.setContent("info");
             send(msg);
         } catch(FIPAException e) { e.printStackTrace(); }
 
