@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 public class Driver extends Agent {
     private Coords start, dest;
     private String name;
+    private String type;
     // tem tempo previsto de chegada mas ñ sei para que serve
     private double maxMoney; // max money to pay per hour
     private double maxDist; //|parkLocation-maxDist|
@@ -73,28 +74,35 @@ public class Driver extends Agent {
     }
 
     private void initVariables(Object[] args){
+        type = (String) args[0];
         name = getName();
-        double xi =Double.parseDouble((String) args[0]);
-        double yi =Double.parseDouble((String) args[1]);
-        double xf =Double.parseDouble((String) args[2]);
-        double yf =Double.parseDouble((String) args[3]);
+        double xi =Double.parseDouble((String) args[1]);
+        double yi =Double.parseDouble((String) args[2]);
+        double xf =Double.parseDouble((String) args[3]);
+        double yf =Double.parseDouble((String) args[4]);
         start = new Coords(xi,yi);
         dest = new Coords(xf,yf);
-        maxMoney =Double.parseDouble((String) args[4]);
-        maxDist =Double.parseDouble((String) args[5]);
-        timePark =Double.parseDouble((String) args[6]);
+        maxMoney =Double.parseDouble((String) args[5]);
+        maxDist =Double.parseDouble((String) args[6]);
+        timePark =Double.parseDouble((String) args[7]);
         utility = timePark * maxMoney + maxDist;
         parkUtilities = new ArrayList<>();
     }
 
     protected void setup() {
         Object[] args = getArguments();
-        // args: xi, yi, xf, yf, maxMoney, maxDist, timePark
-        // exemplo 49.3, 49.4, 65.12, 12.2, 25, 100, 2
-        if(args != null && args.length == 7) {
+        // args: tipo de driver(explorer, rational), xi, yi, xf, yf, maxMoney, maxDist, timePark
+        // exemplo:explorer, 49.3, 49.4, 65.12, 12.2, 25, 100, 2
+        if(args != null && args.length == 8) {
             initVariables(args);
         } else {
             System.err.println("Missing Parameters!");
+            return;
+        }
+
+        if(type.equals("") || !(type.equals("explorer") || type.equals("rational"))){
+            System.err.println("Introduced wrong type for driver!");
+            System.err.println("Typed introduced: " + type);
             return;
         }
 
