@@ -22,6 +22,8 @@ public class DriverController extends Agent{
             super(a);
         }
 
+        // TODO por aqui um timer para poder acabar a simulação ?
+        // acho que isto ñ precisa de receber mensagens right?
         @Override
         public void action(){
            /* ACLMessage msg = blockingReceive();
@@ -62,7 +64,7 @@ public class DriverController extends Agent{
         private void rejectMessage(ACLMessage msg){
             ACLMessage reply = msg.createReply();
             msg.setPerformative(ACLMessage.UNKNOWN);
-            System.err.println("Received message with unexpected format");
+            System.err.println("Received message in DriverController with unexpected format");
             reply.setContent("unexpected format");
             send(reply);
         }
@@ -86,10 +88,24 @@ public class DriverController extends Agent{
             e.printStackTrace();
         }
 
-
         // cria behaviour
         DriverController.DriverControllerBehaviour b = new DriverController.DriverControllerBehaviour(this);
         addBehaviour(b);
+
+        // pesquisa DF por agentes "driver" para poder começar a simulação
+        DFAgentDescription template = new DFAgentDescription();
+        ServiceDescription sd1 = new ServiceDescription();
+        sd1.setType("Agente Driver");
+        template.addServices(sd1);
+        try {
+            DFAgentDescription[] result = DFService.search(this, template);
+            ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+            for (DFAgentDescription aResult : result)
+                msg.addReceiver(aResult.getName());
+            msg.setContent("Start");
+            send(msg);
+            System.out.println("Started Drivers!");
+        } catch(FIPAException e) { e.printStackTrace(); }
     }   // fim do metodo setup
 
     protected void takeDown(){

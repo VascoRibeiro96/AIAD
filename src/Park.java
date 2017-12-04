@@ -21,13 +21,12 @@ public class Park extends Agent {
     //ter logica do comportamento aqui?
     class ParkBehaviour extends SimpleBehaviour{
         private boolean end = false;
+        private final Object lock2 = new Object();
 
-        public ParkBehaviour(Agent a){
+        private ParkBehaviour(Agent a){
             super(a);
         }
 
-
-        //TODO receber uma mensagem
         @Override
         public void action() {
             ACLMessage msg = blockingReceive();
@@ -35,6 +34,8 @@ public class Park extends Agent {
                 System.out.println(getLocalName() + ": recebi " + msg.getContent());
                 if(msg.getContent().equals("info"))
                     sendInformation(msg);
+                else if(msg.getContent().equals("leave"))
+                    freeSpot();
                 else rejectMessage(msg);
             }
             else if(msg.getPerformative() == ACLMessage.REQUEST){
@@ -47,19 +48,26 @@ public class Park extends Agent {
 
         private void updateParking(ACLMessage msg){
             ACLMessage reply = msg.createReply();
-            if(spots != 0){
-                reply.setPerformative(ACLMessage.AGREE);
-                reply.setContent("success");
-                spots--;
-                System.out.println("Oh yee parked! Current space " + spots);
+            synchronized (lock2) {
+                if(spots != 0){
+                    reply.setPerformative(ACLMessage.AGREE);
+                    reply.setContent("success");
+                    spots--;
+                    System.out.println("Oh yee parked! Current space " + spots);
+                }
+                else{
+                    reply.setPerformative(ACLMessage.REFUSE);
+                    reply.setContent("unavailable");
+                    System.out.println("Park full!");
+                }
+                send(reply);
             }
-            else{
-                reply.setPerformative(ACLMessage.REFUSE);
-                reply.setContent("unavailable");
-                System.out.println("Park full!");
-                end = true; // TODO temporario
+        }
+
+        private void freeSpot(){
+            synchronized (lock2) {
+                spots++;
             }
-            send(reply);
         }
 
         private void sendInformation(ACLMessage msg){

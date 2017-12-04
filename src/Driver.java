@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.lang.Thread.sleep;
+
 public class Driver extends Agent {
     private Coords start, dest;
     private String name;
@@ -23,14 +25,17 @@ public class Driver extends Agent {
     private double utility; // isto é o Ci (maxMoney*timePark+maxDist)
     private ArrayList<ParkInfo> parkUtilities; // Ci - (alpha * price * time) - (beta - distance)
     private ParkInfo bestPark = null;
-    private Object lock1 = new Object();
+    private final Object lock1 = new Object();
     // TODO dp por variávies aleatórias para isto aqui em cima
 
     class DriverBehaviour extends SimpleBehaviour{
         private boolean end = false;
+        private ArrayList<String> parksFull = new ArrayList<>();
+        private boolean hasParked = false;
+        private ParkInfo park2park; // parque para estacionar (pqp ingles é tudo a mesma coisa)
 
-        public DriverBehaviour(Agent a){
-            super(a);
+        private DriverBehaviour(Agent a){
+            super(a); // o nome desta variável é myAgent
         }
 
         @Override
@@ -40,6 +45,22 @@ public class Driver extends Agent {
                 System.out.println(getLocalName() + ": recebi " + msg.getContent());
                 if(msg.getContent().contains("retInfo,"))
                     updateParkUtils(msg);
+                else if(msg.getContent().equals("Start")){
+                    park2park = bestPark;
+                    parkRequest(ACLMessage.REQUEST,"park");
+                }
+                else rejectMessage(msg);
+            }
+            else if(msg.getPerformative() == ACLMessage.AGREE) {
+                if(msg.getContent().equals("success"))
+                    parkDriver();
+            }
+            else if(msg.getPerformative() == ACLMessage.REFUSE) {
+                if(msg.getContent().equals("unavailable")){
+                    updatePark2Park();
+                    if(parksFull.size() != parkUtilities.size())
+                        parkRequest(ACLMessage.REQUEST,"park");
+                }
                 else rejectMessage(msg);
             }
             else rejectMessage(msg);
@@ -60,6 +81,52 @@ public class Driver extends Agent {
                 }
                 parkUtilities.add(p);
             }
+        }
+
+        private void updatePark2Park(){
+            parksFull.add(park2park.name);
+            ParkInfo goodPark = null;
+            for(ParkInfo park : parkUtilities){
+                if(parksFull.contains(park.name))continue;
+                if(goodPark == null || goodPark.utility < park.getUtility(utility,timePark,dest))
+                    goodPark = park;
+            }
+            if(goodPark == null) return;
+            park2park = goodPark;
+        }
+
+        // envia mensagem para o parque selecionado para estacionar
+        // 1º tipo de mensagem é perguntar ao melhor parque calculado se pode lá estacionar.
+        // 2ª tipo de mensagem é informar o parque onde estacionou que pretende sair.
+        // request é o tipo de mensagem (inform ou request) e content é o conteúdo da mensagem
+        private void parkRequest(final int request, String content){
+            DFAgentDescription template = new DFAgentDescription();
+            ServiceDescription sd1 = new ServiceDescription();
+            sd1.setType("Agente Park");
+            template.addServices(sd1);
+            try {
+                DFAgentDescription[] result = DFService.search(myAgent, template);
+                ACLMessage msg = new ACLMessage(request);
+                for (DFAgentDescription aResult : result)
+                    if (aResult.getName().getName().equals(park2park.name))
+                        msg.addReceiver(aResult.getName());
+                msg.setContent(content);
+                send(msg);
+            } catch(FIPAException e) { e.printStackTrace(); }
+        }
+
+        private void parkDriver(){
+            hasParked = true;
+            new Thread(() -> {
+                try {
+                    long time = (long)(timePark * 60 * 60 * 1000); // timePark = horas logo isto converte para ms
+                    sleep(time);
+                    System.out.println("Driver " + name + " parking ended!");
+                    parkRequest(ACLMessage.INFORM,"leave");
+                } catch (InterruptedException e) {
+                    System.err.println("Parking on" + name + " was stopped! " + e.getMessage());
+                }
+            }).start();
         }
 
         private void rejectMessage(ACLMessage msg){
@@ -111,7 +178,7 @@ public class Driver extends Agent {
         dfd.setName(getAID());
         ServiceDescription sd = new ServiceDescription();
         sd.setName(getName());
-        sd.setType("Agente driver");
+        sd.setType("Agente Driver");
         dfd.addServices(sd);
         try {
             DFService.register(this, dfd);
@@ -124,7 +191,10 @@ public class Driver extends Agent {
         addBehaviour(b);
 
         System.out.println("Driver " + name + " was created! Total util:" + utility);
+        queryParks();
+    }   // fim do metodo setup
 
+    private void queryParks(){
         // pesquisa DF por agentes "park"
         DFAgentDescription template = new DFAgentDescription();
         ServiceDescription sd1 = new ServiceDescription();
@@ -139,8 +209,7 @@ public class Driver extends Agent {
             msg.setContent("info");
             send(msg);
         } catch(FIPAException e) { e.printStackTrace(); }
-
-    }   // fim do metodo setup
+    }
 
     protected void takeDown(){
         try {
