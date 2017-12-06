@@ -32,7 +32,7 @@ public class ParkingModel extends Repast3Launcher {
 	
 	@Override
 	public void begin() {
-		super.begin();
+		// super.begin();
 		buildModel();
 		buildSchedule();
 		buildDisplay();
@@ -68,11 +68,9 @@ public class ParkingModel extends Repast3Launcher {
 
 	@Override
 	public void setup() {
-		super.setup();
+		// super.setup();
 		System.out.println("Running setup...");
 	}
-	
-	
 	
 	@Override
 	protected void launchJADE() {
@@ -83,64 +81,45 @@ public class ParkingModel extends Repast3Launcher {
 	}
 	
 	private Park createNewPark(){
+		// tipo (static ou dynamic), preco, nº lugares, x, y
 		// static, 10, 3, 49.3, 54.1
-		Object[] args = new Object[8];
+		Object[] args = new Object[5];
+		args[0] = "static";
+		args[1] = "10"; // preco por h
+		args[2] = "3"; // nº total de lugares
+		args[3] = "2"; // isto e o y é melhor ser em Inteiro porcausa da grelha
+		args[4] = "5"; // 
 		return new Park(args);
+	}
+	
+	private Driver createNewDriver(){
+		// args: tipo de driver(explorer, rational), xi, yi, xf, yf, maxMoney, maxDist, timePark
+		// explorer, 49.3, 49.4, 65.12, 12.2, 25, 100, 2
+		Object[] args = new Object[8];
+		args[0] = "rational"; // tipo
+		args[1] = "32"; //xi
+		args[2] = "32"; // yi
+		args[3] = "47"; // xf
+		args[4] = "47"; // yf
+		args[5] = "25"; // max dinheiro a pagar por hora
+		args[6] = "100"; // distancia maxima a andar a pé
+		args[7] = "2"; // tempo de estacionamento
+		return new Driver(args);
 	}
 	
 	private void launchAgents() {
 		try{
 			for(int i = 0; i < numParks; i++){
 				Park p = createNewPark();
-				mainContainer.acceptNewAgent("Park " + i, p);
+				mainContainer.acceptNewAgent("Park " + i, p).start();
 			}
-			
+			for(int i = 0; i < numDrivers; i++){
+				Driver d = createNewDriver();
+				mainContainer.acceptNewAgent("Driver " + i, d).start();
+			}
 		} catch (StaleProxyException e){
 			e.printStackTrace();
 		}
-	
-		int N_CONSUMERS = N;
-		int N_CONSUMERS_FILTERING_PROVIDERS = N;
-		int N_PROVIDERS = 2*N;
-		
-		try {
-			
-			AID resultsCollectorAID = null;
-			if(USE_RESULTS_COLLECTOR) {
-				// create results collector
-				ResultsCollector resultsCollector = new ResultsCollector(N_CONSUMERS + N_CONSUMERS_FILTERING_PROVIDERS);
-				mainContainer.acceptNewAgent("ResultsCollector", resultsCollector).start();
-				resultsCollectorAID = resultsCollector.getAID();
-			}
-			
-			// create providers
-			// good providers
-			for (int i = 0; i < N_PROVIDERS/2; i++) {
-				ProviderAgent pa = new ProviderAgent(FAILURE_PROBABILITY_GOOD_PROVIDER);
-				agentContainer.acceptNewAgent("GoodProvider" + i, pa).start();
-			}
-			// bad providers
-			for (int i = 0; i < N_PROVIDERS/2; i++) {
-				ProviderAgent pa = new ProviderAgent(FAILURE_PROBABILITY_BAD_PROVIDER);
-				agentContainer.acceptNewAgent("BadProvider" + i, pa).start();
-			}
-
-			// create consumers
-			// consumers that use all providers
-			for (int i = 0; i < N_CONSUMERS; i++) {
-				ConsumerAgent ca = new ConsumerAgent(N_PROVIDERS, N_CONTRACTS, resultsCollectorAID);
-				mainContainer.acceptNewAgent("Consumer" + i, ca).start();
-			}
-			// consumers that filter providers
-			for (int i = 0; i < N_CONSUMERS_FILTERING_PROVIDERS; i++) {
-				ConsumerAgent ca = new ConsumerAgent(FILTER_SIZE, N_CONTRACTS, resultsCollectorAID);
-				mainContainer.acceptNewAgent("ConsumerF" + i, ca).start();
-			}
-
-		} catch (StaleProxyException e) {
-			e.printStackTrace();
-		}
-		*/
 	}
 	
 	public static void main(String[] args) {
