@@ -1,14 +1,13 @@
-import jade.core.*;
-import jade.core.behaviours.*;
+package agents;
 import jade.lang.acl.ACLMessage;
-import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
-import jade.domain.DFService;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
-import utils.Coords;
-import utils.ParkInfo;
 
 import java.util.ArrayList;
+import sajas.core.Agent;
+import sajas.core.behaviours.SimpleBehaviour;
+import sajas.domain.DFService;
 
 
 public class DriverController extends Agent{
@@ -16,7 +15,7 @@ public class DriverController extends Agent{
     private ArrayList<Driver> drivers;
 
     class DriverControllerBehaviour extends SimpleBehaviour{
-        private boolean end = false;
+		private boolean end = false;
 
         public DriverControllerBehaviour(Agent a){
             super(a);

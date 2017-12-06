@@ -1,21 +1,22 @@
-import jade.core.*;
-import jade.core.behaviours.*;
+package agents;
+
 import jade.lang.acl.ACLMessage;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
-import jade.domain.DFService;
 import jade.domain.FIPAException;
-import utils.Coords;
-import utils.ParkInfo;
 
 import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import agents.utils.Coords;
+import agents.utils.ParkInfo;
+import sajas.core.Agent;
+import sajas.core.behaviours.SimpleBehaviour;
+import sajas.domain.DFService;
 
 import static java.lang.Thread.sleep;
 
 public class Driver extends Agent {
-    private Coords start, dest;
+	private Coords start, dest;
     private String name;
     private String type;
     // tem tempo previsto de chegada mas ñ sei para que serve
@@ -142,7 +143,6 @@ public class Driver extends Agent {
 
     private void initVariables(Object[] args){
         type = (String) args[0];
-        name = getName();
         double xi =Double.parseDouble((String) args[1]);
         double yi =Double.parseDouble((String) args[2]);
         double xf =Double.parseDouble((String) args[3]);
@@ -155,11 +155,16 @@ public class Driver extends Agent {
         utility = timePark * maxMoney + maxDist;
         parkUtilities = new ArrayList<>();
     }
-
+    
+    // args: tipo de driver(explorer, rational), xi, yi, xf, yf, maxMoney, maxDist, timePark
+    // exemplo:explorer, 49.3, 49.4, 65.12, 12.2, 25, 100, 2
+    public Driver(Object[] args){
+    	initVariables(args);
+    }
+    
     protected void setup() {
+    	/*
         Object[] args = getArguments();
-        // args: tipo de driver(explorer, rational), xi, yi, xf, yf, maxMoney, maxDist, timePark
-        // exemplo:explorer, 49.3, 49.4, 65.12, 12.2, 25, 100, 2
         if(args != null && args.length == 8) {
             initVariables(args);
         } else {
@@ -172,8 +177,9 @@ public class Driver extends Agent {
             System.err.println("Typed introduced: " + type);
             return;
         }
-
+		*/
         // regista agente no DF
+    	name = getName();
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
         ServiceDescription sd = new ServiceDescription();

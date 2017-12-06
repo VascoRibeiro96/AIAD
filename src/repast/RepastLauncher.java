@@ -1,14 +1,16 @@
+package repast;
 import uchicago.src.sim.engine.SimModelImpl;
 import uchicago.src.sim.engine.Schedule;
 import uchicago.src.sim.engine.SimInit;
 
+/*
 import jade.core.Profile;
 import jade.core.ProfileImpl;
 import jade.wrapper.StaleProxyException;
 import sajas.core.Runtime;
 import sajas.sim.repasts.RepastSLauncher;
 import sajas.wrapper.ContainerController;
-
+*/
 
 public class RepastLauncher extends SimModelImpl {
 	// Default Values

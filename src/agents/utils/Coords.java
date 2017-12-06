@@ -1,4 +1,4 @@
-package utils;
+package agents.utils;
 
 public class Coords {
     public double x,y;
