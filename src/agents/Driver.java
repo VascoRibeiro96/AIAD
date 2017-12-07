@@ -1,27 +1,26 @@
 package agents;
 
-import jade.lang.acl.ACLMessage;
-import jade.domain.FIPAAgentManagement.ServiceDescription;
-import jade.domain.FIPAAgentManagement.DFAgentDescription;
-import jade.domain.FIPAException;
-
-import java.awt.*;
-import java.util.ArrayList;
-
 import agents.utils.Coords;
 import agents.utils.ParkInfo;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.domain.FIPAException;
+import jade.lang.acl.ACLMessage;
 import sajas.core.Agent;
 import sajas.core.behaviours.SimpleBehaviour;
 import sajas.domain.DFService;
 import uchicago.src.sim.gui.Drawable;
 import uchicago.src.sim.gui.SimGraphics;
 
+import java.awt.*;
+import java.util.ArrayList;
+
 import static java.lang.Thread.sleep;
 
 public class Driver extends Agent implements Drawable {
-	private Coords start, dest;
-	private int curX;
-	private int curY;
+    private Coords start, dest;
+    private int curX;
+    private int curY;
     private String name;
     private String type;
     // tem tempo previsto de chegada mas ñ sei para que serve
@@ -35,7 +34,7 @@ public class Driver extends Agent implements Drawable {
 
     // TODO dp por variávies aleatórias para isto aqui em cima
 
-    class DriverBehaviour extends SimpleBehaviour{
+    class DriverBehaviour extends SimpleBehaviour {
         private boolean end = false;
         private ArrayList<String> parksFull = new ArrayList<>();
         private boolean hasParked = false;
@@ -161,13 +160,13 @@ public class Driver extends Agent implements Drawable {
         utility = timePark * maxMoney + maxDist;
         parkUtilities = new ArrayList<>();
     }
-    
+
     // args: tipo de driver(explorer, rational), xi, yi, xf, yf, maxMoney, maxDist, timePark
     // exemplo:explorer, 49.3, 49.4, 65.12, 12.2, 25, 100, 2
     public Driver(Object[] args){
-    	initVariables(args);
+        initVariables(args);
     }
-    
+
     protected void setup() {
     	/*
         Object[] args = getArguments();
@@ -185,7 +184,7 @@ public class Driver extends Agent implements Drawable {
         }
 		*/
         // regista agente no DF
-    	name = getName();
+        name = getName();
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
         ServiceDescription sd = new ServiceDescription();
@@ -244,7 +243,7 @@ public class Driver extends Agent implements Drawable {
     @Override
     public void draw(SimGraphics simGraphics) {
         //simGraphics.drawFastRoundRect(Color.blue);
-        simGraphics.draw4ColorHollowRect(Color.blue,Color.green,Color.red,Color.yellow);
+        simGraphics.drawRoundRect(Color.blue);
     }
 
     @Override
@@ -258,8 +257,8 @@ public class Driver extends Agent implements Drawable {
     }
 
     public void stepi(){
-    	System.out.println("Driver " + name + " cenas " + start);
-    	curX ++;
-    	curY --;
+        System.out.println("Driver " + name + " cenas " + start);
+        curX ++;
+        curY --;
     }
 }

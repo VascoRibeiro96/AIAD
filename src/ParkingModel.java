@@ -1,4 +1,3 @@
-package repast;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -7,6 +6,7 @@ import agents.Driver;
 import agents.Park;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
+import repast.ParkingSpace;
 import sajas.core.Runtime;
 import sajas.sim.repast3.Repast3Launcher;
 import sajas.wrapper.ContainerController;
@@ -57,7 +57,6 @@ public class ParkingModel extends Repast3Launcher {
 
     private void buildSchedule() {
         System.out.println("Running buildSchedule...");
-
         class TestStep extends BasicAction {
             public void execute() {
                 SimUtilities.shuffle(driverList);
@@ -70,7 +69,6 @@ public class ParkingModel extends Repast3Launcher {
         }
         schedule.scheduleActionAtInterval(10, new TestStep());
     }
-
     private void buildDisplay() {
         System.out.println("Running buildDisplay...");
         ColorMap map = new ColorMap();
@@ -106,7 +104,6 @@ public class ParkingModel extends Repast3Launcher {
         pkspc = null;
         parkList = new ArrayList<>();
         driverList = new ArrayList<>();
-        schedule = new Schedule(1);
         if (displaySurf != null){
             displaySurf.dispose();
         }
@@ -114,6 +111,7 @@ public class ParkingModel extends Repast3Launcher {
         displaySurf = new DisplaySurface(this, "Carry Drop Model Window 1");
         registerDisplaySurface("Carry Drop Model Window 1", displaySurf);
         super.setup();
+        schedule = super.getSchedule();
         System.out.println("Running setup...");
     }
 
@@ -158,13 +156,13 @@ public class ParkingModel extends Repast3Launcher {
             for(int i = 0; i < numParks; i++){
                 Park p = createNewPark();
                 parkList.add(p);
-                mainContainer.acceptNewAgent("Park " + i, p).start();
+                mainContainer.acceptNewAgent("Park " + i, p);
             }
             for(int i = 0; i < numDrivers; i++){
                 Driver d = createNewDriver();
                 if(pkspc.addDriver(d)) {
                     driverList.add(d);
-                    mainContainer.acceptNewAgent("Driver " + i, d).start();
+                    mainContainer.acceptNewAgent("Driver " + i, d);
                 }
             }
         } catch (StaleProxyException e){
