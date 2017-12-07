@@ -4,8 +4,6 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAException;
 
-import java.util.ArrayList;
-
 import agents.utils.Coords;
 import sajas.core.Agent;
 import sajas.core.behaviours.SimpleBehaviour;
@@ -15,15 +13,16 @@ import sajas.domain.DFService;
 public class Park extends Agent {
     private String name;
     private double price;
-    private int spots;
+	private int spots;
     private String type;
-    private ArrayList<Integer> spotStory;
+    // private ArrayList<Integer> spotStory;
     private Coords location;
     //TODO something else right talvez horario de abertura e fecho?
 
     //ter logica do comportamento aqui?
     class ParkBehaviour extends SimpleBehaviour{
-        private boolean end = false;
+		private static final long serialVersionUID = 1L;
+		private boolean end = false;
         private final Object lock2 = new Object();
 
         private ParkBehaviour(Agent a){
@@ -109,13 +108,14 @@ public class Park extends Agent {
         double x = Double.parseDouble((String) args[3]);
         double y = Double.parseDouble((String) args[4]);
         location = new Coords(x,y);
-        spotStory = new ArrayList<>();
+        // spotStory = new ArrayList<>();
     }
     
     public Park(Object[] args){
     	initVariables(args);
     }
     
+
     protected void setup() {
     	/*
         Object[] args = getArguments();
@@ -132,6 +132,7 @@ public class Park extends Agent {
         }
 		*/
         // regista agente no DF
+    	System.out.println("bananas");
     	name = getName();
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
@@ -164,4 +165,44 @@ public class Park extends Agent {
             e.printStackTrace();
         }
     }
+
+	public String getParkName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public double getPrice() {
+		return price;
+	}
+
+	public void setPrice(double price) {
+		this.price = price;
+	}
+
+	public int getSpots() {
+		return spots;
+	}
+
+	public void setSpots(int spots) {
+		this.spots = spots;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public Coords getLocation() {
+		return location;
+	}
+
+	public void setLocation(Coords location) {
+		this.location = location;
+	}
 }
