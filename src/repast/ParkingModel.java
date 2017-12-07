@@ -23,8 +23,8 @@ import jade.wrapper.StaleProxyException;
 public class ParkingModel extends Repast3Launcher {
     private static final int NUMPARKS = 10;
     private static final int NUMDRIVERS = 25; // maybe moar idk xD
-    private static final int WORLDXSIZE = 420;
-    private static final int WORLDYSIZE = 420;
+    private static final int WORLDXSIZE = 100;
+    private static final int WORLDYSIZE = 100;
     private static final int AGENT_LIFESPAN = 30;
 
     private int numParks = NUMPARKS;
@@ -74,7 +74,8 @@ public class ParkingModel extends Repast3Launcher {
     private void buildDisplay() {
         System.out.println("Running buildDisplay...");
         ColorMap map = new ColorMap();
-        map.mapColor(0, Color.white);
+        map.mapColor(0, Color.black);
+        map.mapColor(1, Color.white);
         Value2DDisplay displayMap = new Value2DDisplay(pkspc.getMapSpace(), map);
 
         Object2DDisplay displayDrivers = new Object2DDisplay(pkspc.getDriverSpace());

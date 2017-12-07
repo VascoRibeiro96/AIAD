@@ -12,10 +12,13 @@ public class ParkingSpace {
 		driverSpace = new Object2DGrid(x,y);
 		parkSpace = new Object2DGrid(x,y);
 		mapSpace = new Object2DGrid(x,y);
-		
+
 		for(int i = 0;i < x; i++)
-			for(int j = 0; j < y; j++)
-				mapSpace.putObjectAt(i, j, new Integer(0));
+			for(int j = 0; j < y; j++){
+                if((i % 2 == 0 && j % 2 != 0 ) || (i % 2 != 0 && j % 2 == 0 )) mapSpace.putObjectAt(i, j, new Integer(0));
+                else mapSpace.putObjectAt(i, j, new Integer(1));
+            }
+
 	}
 
 	public Object2DGrid getDriverSpace() {

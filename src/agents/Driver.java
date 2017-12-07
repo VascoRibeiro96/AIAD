@@ -243,7 +243,8 @@ public class Driver extends Agent implements Drawable {
 
     @Override
     public void draw(SimGraphics simGraphics) {
-        simGraphics.drawFastRoundRect(Color.blue);
+        //simGraphics.drawFastRoundRect(Color.blue);
+        simGraphics.draw4ColorHollowRect(Color.blue,Color.green,Color.red,Color.yellow);
     }
 
     @Override
