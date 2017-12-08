@@ -69,6 +69,7 @@ public class ParkingModel extends Repast3Launcher {
         ColorMap map = new ColorMap();
         map.mapColor(0, Color.black);
         map.mapColor(1, Color.white);
+        map.mapColor(2, Color.yellow);
         Value2DDisplay displayMap = new Value2DDisplay(pkspc.getMapSpace(), map);
 
         Object2DDisplay displayDrivers = new Object2DDisplay(pkspc.getDriverSpace());
@@ -150,8 +151,10 @@ public class ParkingModel extends Repast3Launcher {
         try{
             for(int i = 0; i < numParks; i++){
                 Park p = createNewPark();
-                parkList.add(p);
-                mainContainer.acceptNewAgent("Park " + i, p).start();
+                if(pkspc.addPark(p)){
+                    parkList.add(p);
+                    mainContainer.acceptNewAgent("Park " + i, p).start();
+                }
             }
             for(int i = 0; i < numDrivers; i++){
                 Driver d = createNewDriver();

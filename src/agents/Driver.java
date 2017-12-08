@@ -340,6 +340,10 @@ public class Driver extends Agent implements Drawable {
         curY = (int) start.y;
     }
 
+    public void setDest(double x, double y){
+        dest = new Coords(x,y);
+    }
+
     @Override
     public void draw(SimGraphics simGraphics) {
         simGraphics.drawRoundRect(curColor);

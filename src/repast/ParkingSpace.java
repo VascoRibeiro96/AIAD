@@ -1,6 +1,7 @@
 package repast;
 
 import agents.Driver;
+import agents.Park;
 import uchicago.src.sim.space.Object2DGrid;
 
 public class ParkingSpace {
@@ -28,16 +29,29 @@ public class ParkingSpace {
 	public Driver getDriverAt(int x, int y){
 		return (Driver) driverSpace.getObjectAt(x,y);
 	}
-	
+
+	public Park getParkAt(int x, int y) {
+	    return (Park) parkSpace.getObjectAt(x,y);
+    }
+
 	public boolean addDriver(Driver d) {
 		boolean retVal = false;
 		int count = 0;
 		int countLimit = driverSpace.getSizeX() * driverSpace.getSizeY();
 
+		// drivers começam nas periferias do mapa
 		while((!retVal) && (count < countLimit)){
-			int x = (int)(Math.random()*(driverSpace.getSizeX()));
-			int y = (int)(Math.random()*(driverSpace.getSizeY()));
-			if(getDriverAt(x,y) == null){
+		    double rand = Math.random();
+		    int x,y;
+		    if(rand >= 0 && rand < 0.5){
+		        x = (Math.random() < 0.5) ? 0 : driverSpace.getSizeX()-1;
+		        y = (int)(Math.random()*(driverSpace.getSizeY()));
+            }
+            else {
+                y = (Math.random() < 0.5) ? 0 : driverSpace.getSizeY()-1;
+                x = (int)(Math.random()*(driverSpace.getSizeX()));
+            }
+			if(getDriverAt(x,y) == null && setDest(d)){
 				driverSpace.putObjectAt(x,y,d);
 				d.setStart(x,y);
 				retVal = true;
@@ -48,19 +62,44 @@ public class ParkingSpace {
 		return retVal;
 	}
 
+	public boolean setDest(Driver d){
+        int x = (int)(Math.random()*(parkSpace.getSizeX()));
+        int y = (int)(Math.random()*(parkSpace.getSizeY()));
+        if(x == 0 || x == parkSpace.getSizeX()-1) return false;
+        if(y == 0 || y == parkSpace.getSizeX()-1) return false;
+        if(getParkAt(x,y) == null){
+            d.setDest(x,y);
+            return true;
+        }
+        else return false;
+    }
+
+	public boolean addPark(Park p) {
+	    boolean retVal = false;
+	    int count = 0;
+	    int countLimit = parkSpace.getSizeX() * parkSpace.getSizeY();
+
+	    while((!retVal) && (count < countLimit)){
+	        int x = (int)(Math.random()*(parkSpace.getSizeX()));
+            int y = (int)(Math.random()*(parkSpace.getSizeY()));
+            if(x == 0 || x == parkSpace.getSizeX()-1) continue;
+            if(y == 0 || y == parkSpace.getSizeX()-1) continue;
+            if(getParkAt(x,y) == null){
+                parkSpace.putObjectAt(x,y,p);
+                mapSpace.putObjectAt(x, y, new Integer(2));
+                p.updateLocation(x,y);
+                retVal = true;
+            }
+            count++;
+        }
+        return retVal;
+    }
+
 	public Object2DGrid getParkSpace() {
 		return parkSpace;
 	}
 
-	public void setParkSpace(Object2DGrid parkSpace) {
-		this.parkSpace = parkSpace;
-	}
-
 	public Object2DGrid getMapSpace() {
 		return mapSpace;
-	}
-
-	public void setMapSpace(Object2DGrid mapSpace) {
-		this.mapSpace = mapSpace;
 	}
 }

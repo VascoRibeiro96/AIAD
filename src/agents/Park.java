@@ -8,9 +8,13 @@ import agents.utils.Coords;
 import sajas.core.Agent;
 import sajas.core.behaviours.SimpleBehaviour;
 import sajas.domain.DFService;
+import uchicago.src.sim.gui.Drawable;
+import uchicago.src.sim.gui.SimGraphics;
+
+import java.awt.*;
 
 
-public class Park extends Agent {
+public class Park extends Agent implements Drawable {
     private String name;
     private double price;
 	private int spots;
@@ -160,6 +164,23 @@ public class Park extends Agent {
 
     private void getVars(){
         System.out.println("New park created: " + name + " " + price + " " + spots + " " + location);
+    }
+
+    public int getX(){
+        return (int)location.x;
+    }
+
+    public int getY(){
+        return (int)location.y;
+    }
+
+    @Override
+    public void draw(SimGraphics simGraphics) {
+        simGraphics.drawRoundRect(Color.yellow);
+    }
+
+    public void updateLocation(int x, int y){
+        location = new Coords(x,y);
     }
 
     //metodo takeDown
