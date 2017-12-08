@@ -212,9 +212,8 @@ public class Driver extends Agent implements Drawable {
         @Override
         public void action() {
             Coords cur = new Coords(curX, curY);
-            Coords des = new Coords(0,0);
-            if(cur.calculateDistance(des) != 0){
-                updateCurCoords(cur,des);
+            if(cur.calculateDistance(start) != 0){
+                updateCurCoords(cur,start);
             }
             else {
                 end = true;
