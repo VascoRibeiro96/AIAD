@@ -36,7 +36,7 @@ public class Driver extends Agent implements Drawable {
 
     private final Object lock1 = new Object();
 
-    // cor dentro do carro = azul, fora = verde
+    // cor dentro do carro = azul, fora = verde, a sair de cena = vermelho
     private Color curColor = Color.blue;
 
 
@@ -206,6 +206,7 @@ public class Driver extends Agent implements Drawable {
 
         private DriverExitSceneBehaviour(Agent a){
             super(a);
+            curColor = Color.red;
         }
 
         @Override
@@ -280,6 +281,7 @@ public class Driver extends Agent implements Drawable {
 
         private void parkDriver(){
             addBehaviour(new DriverWalkToDestBehaviour(myAgent,park2park));
+            curColor = Color.green;
             end = true;
         }
 
