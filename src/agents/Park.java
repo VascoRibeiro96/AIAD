@@ -12,6 +12,7 @@ import uchicago.src.sim.gui.Drawable;
 import uchicago.src.sim.gui.SimGraphics;
 
 import java.awt.*;
+import java.util.ArrayList;
 
 
 public class Park extends Agent implements Drawable {
@@ -19,15 +20,15 @@ public class Park extends Agent implements Drawable {
     private double price;
 	private int spots;
     private String type;
-    // private ArrayList<Integer> spotStory;
+    private ArrayList<Double> revenueStory;
     private Coords location;
-    //TODO something else right talvez horario de abertura e fecho?
 
     //ter logica do comportamento aqui?
     class ParkBehaviour extends SimpleBehaviour{
 		private static final long serialVersionUID = 1L;
 		private boolean end = false;
         private final Object lock2 = new Object();
+        private double totalRevenue = 0;
 
         private ParkBehaviour(Agent a){
             super(a);
@@ -38,11 +39,11 @@ public class Park extends Agent implements Drawable {
             ACLMessage msg = myAgent.receive();
             while (msg != null){
                 if(msg.getPerformative() == ACLMessage.INFORM) {
-                    System.out.println(getLocalName() + ": recebi " + msg.getContent());
+                    // System.out.println(getLocalName() + ": recebi " + msg.getContent());
                     if(msg.getContent().equals("info"))
                         sendInformation(msg);
-                    else if(msg.getContent().equals("leave"))
-                        freeSpot();
+                    else if(msg.getContent().contains("leave,"))
+                        freeSpot(msg);
                     else rejectMessage(msg);
                 }
                 else if(msg.getPerformative() == ACLMessage.REQUEST){
@@ -76,9 +77,12 @@ public class Park extends Agent implements Drawable {
             }
         }
 
-        private void freeSpot(){
+        private void freeSpot(ACLMessage msg){
             synchronized (lock2) {
                 spots++;
+                String[] splitMsg = msg.getContent().split(",");
+                totalRevenue += Double.parseDouble(splitMsg[1]) * price;
+                System.out.println(name + " total revenue of the day increased to " + totalRevenue);
             }
         }
 
@@ -87,7 +91,7 @@ public class Park extends Agent implements Drawable {
             ACLMessage reply = msg.createReply();
             // preenche conteudo da mensagem
             String answer = "retInfo," + name + "," + price + "," + location + "," + type;
-            System.out.println("Sent " + answer);
+            System.out.println(name + " Sent " + answer);
             reply.setContent(answer);
             // envia mensagem
             send(reply);
@@ -118,7 +122,7 @@ public class Park extends Agent implements Drawable {
         double x = Double.parseDouble((String) args[3]);
         double y = Double.parseDouble((String) args[4]);
         location = new Coords(x,y);
-        // spotStory = new ArrayList<>();
+        revenueStory = new ArrayList<>();
     }
     
     public Park(Object[] args){

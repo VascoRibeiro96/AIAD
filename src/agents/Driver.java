@@ -312,13 +312,14 @@ public class Driver extends Agent implements Drawable {
             else {
                 comeback = true;
                 curTime++;
-                if(curTime >= timePark){
+                if(curTime >= timePark*50){
                     if(cur.calculateDistance(parkLocation) != 0){
                         updateCurCoords(cur,parkLocation);
                     }
                     else{
                         end = true;
-                        parkRequest(ACLMessage.INFORM,"leave", park2park);
+                        String msgContent = "leave," + timePark;
+                        parkRequest(ACLMessage.INFORM,msgContent, park2park);
                         addBehaviour(new DriverExitSceneBehaviour(myAgent));
                     }
                 }
