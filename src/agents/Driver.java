@@ -28,48 +28,85 @@ public class Driver extends Agent implements Drawable {
     private double maxDist; //|parkLocation-maxDist|
     private double timePark, timeArrive; // acho que o timearrive ñ serve para nada
     private double utility; // isto é o Ci (maxMoney*timePark+maxDist)
+
+
     private ArrayList<ParkInfo> parkUtilities; // Ci - (alpha * price * time) - (beta - distance)
     private ParkInfo bestPark = null;
+    private final int totalParks;
+
     private final Object lock1 = new Object();
+
+    // cor dentro do carro = azul, fora = verde
+    private Color curColor = Color.blue;
+
 
     // TODO dp por variávies aleatórias para isto aqui em cima
 
-    class DriverBehaviour extends SimpleBehaviour {
-        private boolean end = false;
-        private ArrayList<String> parksFull = new ArrayList<>();
-        private boolean hasParked = false;
-        private ParkInfo park2park; // parque para estacionar (pqp ingles é tudo a mesma coisa)
 
-        private DriverBehaviour(Agent a){
-            super(a); // o nome desta variável é myAgent
+    // common action to reject unknown messages (more of a debugg func)
+    private void rejectMessage(ACLMessage msg){
+        ACLMessage reply = msg.createReply();
+        msg.setPerformative(ACLMessage.UNKNOWN);
+        System.err.println("Driver received message with unexpected format");
+        reply.setContent("unexpected format");
+        send(reply);
+    }
+
+    class DriverQueryBehaviour extends SimpleBehaviour {
+        private boolean end = false;
+
+        private DriverQueryBehaviour(Agent a) {
+            super(a);
         }
 
         @Override
-        public void action(){
-            ACLMessage msg = blockingReceive();
-            if(msg.getPerformative() == ACLMessage.INFORM) {
-                System.out.println(getLocalName() + ": recebi " + msg.getContent());
-                if(msg.getContent().contains("retInfo,"))
-                    updateParkUtils(msg);
-                else if(msg.getContent().equals("Start")){
-                    park2park = bestPark;
-                    parkRequest(ACLMessage.REQUEST,"park");
+        public void action () {
+            DFAgentDescription template = new DFAgentDescription();
+            ServiceDescription sd1 = new ServiceDescription();
+            sd1.setType("Agente Park");
+            template.addServices(sd1);
+            try {
+                DFAgentDescription[] result = DFService.search(myAgent, template);
+                // envia mensagem inicial a todos os agentes "park"
+                if (result.length == totalParks){
+                    ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+                    for (DFAgentDescription aResult : result)
+                        msg.addReceiver(aResult.getName());
+                    msg.setContent("info");
+                    send(msg);
+                    end = true;
+                }
+            } catch(FIPAException e) { e.printStackTrace(); }
+        }
+
+        @Override
+        public boolean done () {
+            return end;
+        }
+    }
+
+    class DriverReceiveInfoBehaviour extends SimpleBehaviour {
+        private boolean end = false;
+        private int msgReceived = 0;
+
+        private DriverReceiveInfoBehaviour(Agent a){
+            super(a);
+        }
+
+        @Override
+        public void action (){
+            ACLMessage msg = myAgent.receive();
+            while (msg != null){
+                if(msg.getPerformative() == ACLMessage.INFORM) {
+                    System.out.println(getLocalName() + ": recebi " + msg.getContent());
+                    if (msg.getContent().contains("retInfo,"))
+                        updateParkUtils(msg);
+                    else rejectMessage(msg);
                 }
                 else rejectMessage(msg);
+                msg = myAgent.receive();
             }
-            else if(msg.getPerformative() == ACLMessage.AGREE) {
-                if(msg.getContent().equals("success"))
-                    parkDriver();
-            }
-            else if(msg.getPerformative() == ACLMessage.REFUSE) {
-                if(msg.getContent().equals("unavailable")){
-                    updatePark2Park();
-                    if(parksFull.size() != parkUtilities.size())
-                        parkRequest(ACLMessage.REQUEST,"park");
-                }
-                else rejectMessage(msg);
-            }
-            else rejectMessage(msg);
+            block();
         }
 
         private void updateParkUtils(ACLMessage msg){
@@ -86,7 +123,94 @@ public class Driver extends Agent implements Drawable {
                     System.out.println("New util best! " + bestPark.getUtility(utility,timePark,dest));
                 }
                 parkUtilities.add(p);
+                msgReceived++;
+                if(msgReceived == totalParks) {
+                    end = true;
+                    addBehaviour(new DriverTravelParkBehaviour(myAgent,bestPark));
+                }
             }
+        }
+
+        @Override
+        public boolean done(){
+            return end;
+        }
+    }
+
+    class DriverTravelParkBehaviour extends SimpleBehaviour{
+        private boolean end = false;
+        private ParkInfo finalPark;
+
+        private DriverTravelParkBehaviour(Agent a, ParkInfo p){
+            super(a);
+            finalPark = p;
+        }
+
+        @Override
+        public void action() {
+            Coords cur = new Coords(curX, curY);
+            Coords des = finalPark.location;
+            if(cur.calculateDistance(des) != 0){
+                if(cur.x < des.x){
+                    curX++;
+                }
+                if(cur.x > des.x){
+                    curX--;
+                }
+                if(cur.y < des.y){
+                    curY++;
+                }
+                if(cur.y > des.y){
+                    curY--;
+                }
+            }
+            else {
+                end = true;
+            }
+        }
+
+        @Override
+        public boolean done() {
+            return end;
+        }
+    }
+    // TODO a desfazer este bicho
+    class DriverBehaviour extends SimpleBehaviour {
+        private boolean end = false;
+        private ArrayList<String> parksFull = new ArrayList<>();
+        private boolean hasParked = false;
+        private ParkInfo park2park; // parque para estacionar (pqp ingles é tudo a mesma coisa)
+
+        private DriverBehaviour(Agent a){
+            super(a); // o nome desta variável é myAgent
+        }
+
+        @Override
+        public void action(){
+            ACLMessage msg = myAgent.receive();
+            while (msg != null){
+                if(msg.getPerformative() == ACLMessage.INFORM) {
+                    if(msg.getContent().equals("Start")){
+                        park2park = bestPark;
+                        parkRequest(ACLMessage.REQUEST,"park");
+                    }
+                    else rejectMessage(msg);
+                }
+                else if(msg.getPerformative() == ACLMessage.AGREE) {
+                    if(msg.getContent().equals("success"))
+                        parkDriver();
+                }
+                else if(msg.getPerformative() == ACLMessage.REFUSE) {
+                    if(msg.getContent().equals("unavailable")){
+                        updatePark2Park();
+                        if(parksFull.size() != parkUtilities.size())
+                            parkRequest(ACLMessage.REQUEST,"park");
+                    }
+                    else rejectMessage(msg);
+                }
+                else rejectMessage(msg);
+            }
+            block();
         }
 
         private void updatePark2Park(){
@@ -135,14 +259,6 @@ public class Driver extends Agent implements Drawable {
             }).start();
         }
 
-        private void rejectMessage(ACLMessage msg){
-            ACLMessage reply = msg.createReply();
-            msg.setPerformative(ACLMessage.UNKNOWN);
-            System.err.println("Driver received message with unexpected format");
-            reply.setContent("unexpected format");
-            send(reply);
-        }
-
         public boolean done(){return end;}
     }
 
@@ -163,8 +279,9 @@ public class Driver extends Agent implements Drawable {
 
     // args: tipo de driver(explorer, rational), xi, yi, xf, yf, maxMoney, maxDist, timePark
     // exemplo:explorer, 49.3, 49.4, 65.12, 12.2, 25, 100, 2
-    public Driver(Object[] args){
+    public Driver(Object[] args, int totalParks){
         initVariables(args);
+        this.totalParks = totalParks;
     }
 
     protected void setup() {
@@ -198,29 +315,12 @@ public class Driver extends Agent implements Drawable {
         }
 
         // cria behaviour
-        Driver.DriverBehaviour b = new Driver.DriverBehaviour(this);
-        addBehaviour(b);
-
+        //Driver.DriverBehaviour b = new Driver.DriverBehaviour(this);
+        // addBehaviour(b);
+        addBehaviour(new DriverQueryBehaviour(this));
+        addBehaviour(new DriverReceiveInfoBehaviour(this));
         System.out.println("Driver " + name + " was created! Total util:" + utility);
-        queryParks();
     }   // fim do metodo setup
-
-    private void queryParks(){
-        // pesquisa DF por agentes "park"
-        DFAgentDescription template = new DFAgentDescription();
-        ServiceDescription sd1 = new ServiceDescription();
-        sd1.setType("Agente Park");
-        template.addServices(sd1);
-        try {
-            DFAgentDescription[] result = DFService.search(this, template);
-            // envia mensagem "drive" inicial a todos os agentes "park"
-            ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-            for(int i=0; i<result.length; ++i)
-                msg.addReceiver(result[i].getName());
-            msg.setContent("info");
-            send(msg);
-        } catch(FIPAException e) { e.printStackTrace(); }
-    }
 
     protected void takeDown(){
         try {
@@ -242,8 +342,7 @@ public class Driver extends Agent implements Drawable {
 
     @Override
     public void draw(SimGraphics simGraphics) {
-        //simGraphics.drawFastRoundRect(Color.blue);
-        simGraphics.drawRoundRect(Color.blue);
+        simGraphics.drawRoundRect(curColor);
     }
 
     @Override
@@ -257,7 +356,6 @@ public class Driver extends Agent implements Drawable {
     }
 
     public void stepi(){
-        System.out.println("Driver " + name + " cenas " + start);
         curX ++;
         curY --;
     }

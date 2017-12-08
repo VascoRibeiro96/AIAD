@@ -57,17 +57,12 @@ public class ParkingModel extends Repast3Launcher {
 
     private void buildSchedule() {
         System.out.println("Running buildSchedule...");
-        class TestStep extends BasicAction {
+        class UpdateBoard extends BasicAction {
             public void execute() {
-                SimUtilities.shuffle(driverList);
-                for(int i =0; i < driverList.size(); i++){
-                    Driver c = driverList.get(i);
-                    c.stepi();
-                }
                 displaySurf.updateDisplay();
             }
         }
-        schedule.scheduleActionAtInterval(10, new TestStep());
+        schedule.scheduleActionBeginning(0,new UpdateBoard());
     }
     private void buildDisplay() {
         System.out.println("Running buildDisplay...");
@@ -101,6 +96,7 @@ public class ParkingModel extends Repast3Launcher {
 
     @Override
     public void setup() {
+        System.out.println("Running setup...");
         pkspc = null;
         parkList = new ArrayList<>();
         driverList = new ArrayList<>();
@@ -112,7 +108,6 @@ public class ParkingModel extends Repast3Launcher {
         registerDisplaySurface("Carry Drop Model Window 1", displaySurf);
         super.setup();
         schedule = super.getSchedule();
-        System.out.println("Running setup...");
     }
 
     @Override
@@ -148,7 +143,7 @@ public class ParkingModel extends Repast3Launcher {
         args[5] = "25"; // max dinheiro a pagar por hora
         args[6] = "100"; // distancia maxima a andar a pé
         args[7] = "2"; // tempo de estacionamento
-        return new Driver(args);
+        return new Driver(args, numParks);
     }
 
     private void launchAgents() {
@@ -156,13 +151,13 @@ public class ParkingModel extends Repast3Launcher {
             for(int i = 0; i < numParks; i++){
                 Park p = createNewPark();
                 parkList.add(p);
-                mainContainer.acceptNewAgent("Park " + i, p);
+                mainContainer.acceptNewAgent("Park " + i, p).start();
             }
             for(int i = 0; i < numDrivers; i++){
                 Driver d = createNewDriver();
                 if(pkspc.addDriver(d)) {
                     driverList.add(d);
-                    mainContainer.acceptNewAgent("Driver " + i, d);
+                    mainContainer.acceptNewAgent("Driver " + i, d).start();
                 }
             }
         } catch (StaleProxyException e){

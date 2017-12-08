@@ -31,21 +31,27 @@ public class Park extends Agent {
 
         @Override
         public void action() {
-            ACLMessage msg = blockingReceive();
-            if(msg.getPerformative() == ACLMessage.INFORM) {
-                System.out.println(getLocalName() + ": recebi " + msg.getContent());
-                if(msg.getContent().equals("info"))
-                    sendInformation(msg);
-                else if(msg.getContent().equals("leave"))
-                    freeSpot();
+            ACLMessage msg = myAgent.receive();
+            while (msg != null){
+                if(msg.getPerformative() == ACLMessage.INFORM) {
+                    System.out.println(getLocalName() + ": recebi " + msg.getContent());
+                    if(msg.getContent().equals("info"))
+                        sendInformation(msg);
+                    else if(msg.getContent().equals("leave"))
+                        freeSpot();
+                    else rejectMessage(msg);
+                }
+                else if(msg.getPerformative() == ACLMessage.REQUEST){
+                    System.out.println("A Driver wants to park :O");
+                    if(msg.getContent().equals("park"))
+                        updateParking(msg);
+                }
                 else rejectMessage(msg);
+                msg = myAgent.receive();
             }
-            else if(msg.getPerformative() == ACLMessage.REQUEST){
-                System.out.println("A Driver wants to park :O");
-                if(msg.getContent().equals("park"))
-                    updateParking(msg);
+            if (msg == null){
+                block();
             }
-            else rejectMessage(msg);
         }
 
         private void updateParking(ACLMessage msg){
@@ -132,7 +138,6 @@ public class Park extends Agent {
         }
 		*/
         // regista agente no DF
-    	System.out.println("bananas");
     	name = getName();
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
