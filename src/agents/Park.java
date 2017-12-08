@@ -46,7 +46,7 @@ public class Park extends Agent implements Drawable {
                     else rejectMessage(msg);
                 }
                 else if(msg.getPerformative() == ACLMessage.REQUEST){
-                    System.out.println("A Driver wants to park :O");
+                    System.out.println("A Driver wants to park!");
                     if(msg.getContent().equals("park"))
                         updateParking(msg);
                 }
@@ -65,12 +65,12 @@ public class Park extends Agent implements Drawable {
                     reply.setPerformative(ACLMessage.AGREE);
                     reply.setContent("success");
                     spots--;
-                    System.out.println("Oh yee parked! Current space " + spots);
+                    System.out.println("A driver parked! Current space " + spots);
                 }
                 else{
                     reply.setPerformative(ACLMessage.REFUSE);
                     reply.setContent("unavailable");
-                    System.out.println("Park full!");
+                    System.out.println(name + " is full!");
                 }
                 send(reply);
             }
