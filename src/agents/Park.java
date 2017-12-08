@@ -18,7 +18,8 @@ import java.util.ArrayList;
 public class Park extends Agent implements Drawable {
     private String name;
     private double price;
-	private int spots;
+    private int totalSpots;
+	private int spots; // nº de lugares vagos
     private String type;
     private ArrayList<Double> revenueStory;
     private Coords location;
@@ -114,11 +115,12 @@ public class Park extends Agent implements Drawable {
 
     // tem de ter 5 argumentos por esta ordem: tipo (static ou dynamic), preço, nº lugares, Longitude(ou x), Latitude(ou y)
     // exemplo static, 10, 3, 49.3, 54.1
-    
+
     private void initVariables(Object[] args){
     	type = (String) args[0];
         price = Double.parseDouble((String) args[1]);
         spots = Integer.parseInt((String) args[2]);
+        totalSpots = spots;
         double x = Double.parseDouble((String) args[3]);
         double y = Double.parseDouble((String) args[4]);
         location = new Coords(x,y);
@@ -131,20 +133,6 @@ public class Park extends Agent implements Drawable {
     
 
     protected void setup() {
-    	/*
-        Object[] args = getArguments();
-        if(args != null && args.length == 5) {
-            initVariables(args);
-        } else {
-            System.err.println("Missing Parameters!");
-            return;
-        }
-        if(type.equals("") || !(type.equals("static") || type.equals("dynamic"))){
-            System.err.println("Introduced wrong type for park!");
-            System.err.println("Typed introduced: " + type);
-            return;
-        }
-		*/
         // regista agente no DF
     	name = getName();
         DFAgentDescription dfd = new DFAgentDescription();

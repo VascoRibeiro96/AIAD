@@ -10,56 +10,36 @@ import sajas.core.behaviours.SimpleBehaviour;
 import sajas.domain.DFService;
 
 
-public class DriverController extends Agent{
+public class SimulationController extends Agent{
 
-    private ArrayList<Driver> drivers;
+    private final int totalParks;
+    private final int totalDrivers;
 
-    class DriverControllerBehaviour extends SimpleBehaviour{
+    class SimulationControllerBehaviour extends SimpleBehaviour{
 		private boolean end = false;
+		private int driversOut = 0;
+		private final Object lockInc = new Object();
 
-        public DriverControllerBehaviour(Agent a){
+        private SimulationControllerBehaviour(Agent a){
             super(a);
         }
 
-        // TODO por aqui um timer para poder acabar a simulação ?
-        // acho que isto ñ precisa de receber mensagens right?
         @Override
-        public void action(){
-           /* ACLMessage msg = blockingReceive();
-            if(msg.getPerformative() == ACLMessage.INFORM) {
-                System.out.println(getLocalName() + ": recebi " + msg.getContent());
-                if(msg.getContent().equals("info"))
-                    sendInformation(msg);
+        public void action() {
+            ACLMessage msg = myAgent.receive();
+            while (msg != null) {
+                if (msg.getPerformative() == ACLMessage.INFORM) {
+                    if(msg.getContent().equals("driverOut")) {
+                        synchronized (lockInc) {
+                            driversOut++;
+                        }
+                    }
+                }
                 else rejectMessage(msg);
             }
-            else if(msg.getPerformative() == ACLMessage.REQUEST){
-                System.out.println("A Driver wants to park :O");
-                if(msg.getContent().equals("park"))
-                    startDrivers(msg);
-            }
-            else rejectMessage(msg);*/
+            block();
         }
 
-        private void startDrivers(ACLMessage msg){
-            ACLMessage reply = msg.createReply();
-            if(!(drivers.isEmpty())){
-                reply.setPerformative(ACLMessage.REQUEST);
-                reply.setContent("success");
-                System.out.println("Started Drivers");
-            }
-            send(reply);
-        }
-
-        private void sendInformation(ACLMessage msg){
-            // cria resposta
-            ACLMessage reply = msg.createReply();
-            // preenche conteudo da mensagem
-            String answer = "Start Drivers";
-            System.out.println("Sent " + answer);
-            reply.setContent(answer);
-            // envia mensagem
-            send(reply);
-        }
         private void rejectMessage(ACLMessage msg){
             ACLMessage reply = msg.createReply();
             msg.setPerformative(ACLMessage.UNKNOWN);
@@ -71,27 +51,30 @@ public class DriverController extends Agent{
         public boolean done(){return end;}
     }
 
+    public SimulationController(int totalParks, int totalDrivers){
+        this.totalDrivers = totalDrivers;
+        this.totalParks = totalParks;
+    }
 
     protected void setup() {
-
         // regista agente no DF
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
         ServiceDescription sd = new ServiceDescription();
         sd.setName(getName());
-        sd.setType("Agente DriverController");
+        sd.setType("Agente SimulationController");
         dfd.addServices(sd);
         try {
             DFService.register(this, dfd);
         } catch(FIPAException e) {
             e.printStackTrace();
         }
-
         // cria behaviour
-        DriverController.DriverControllerBehaviour b = new DriverController.DriverControllerBehaviour(this);
-        addBehaviour(b);
+        addBehaviour(new SimulationControllerBehaviour(this));
+    }   // fim do metodo setup
 
-        // pesquisa DF por agentes "driver" para poder começar a simulação
+    private void restartSimulation() {
+        // pesquisa DF por agentes "driver" para poder recomeçar a simulação
         DFAgentDescription template = new DFAgentDescription();
         ServiceDescription sd1 = new ServiceDescription();
         sd1.setType("Agente Driver");
@@ -105,7 +88,7 @@ public class DriverController extends Agent{
             send(msg);
             System.out.println("Started Drivers!");
         } catch(FIPAException e) { e.printStackTrace(); }
-    }   // fim do metodo setup
+    }
 
     protected void takeDown(){
         try {
