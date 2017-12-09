@@ -164,7 +164,7 @@ public class Driver extends Agent implements Drawable {
                 }
                 else{
                     p.getUtility(utility,timePark,dest);
-                    p.distanceTo = p.location.calculateDistance(dest);
+                    p.distanceTo = p.location.calculateDistance(start);
                     if(bestPark == null || bestPark.distanceTo > p.distanceTo){
                         bestPark = p;
                     }
@@ -307,6 +307,7 @@ public class Driver extends Agent implements Drawable {
                         goodPark = park;
                 }
                 else{
+                    park.distanceTo = park.location.calculateDistance(new Coords(curX,curY));
                     if(goodPark == null || goodPark.distanceTo > park.distanceTo)
                         goodPark = park;
                 }
