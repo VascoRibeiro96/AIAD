@@ -1,3 +1,4 @@
+package repast;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -7,7 +8,6 @@ import agents.Park;
 import agents.SimulationController;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
-import repast.ParkingSpace;
 import sajas.core.Runtime;
 import sajas.sim.repast3.Repast3Launcher;
 import sajas.wrapper.ContainerController;
@@ -19,14 +19,9 @@ import uchicago.src.sim.gui.ColorMap;
 import uchicago.src.sim.gui.DisplaySurface;
 import uchicago.src.sim.gui.Object2DDisplay;
 import uchicago.src.sim.gui.Value2DDisplay;
-import uchicago.src.sim.util.SimUtilities;
 import jade.wrapper.StaleProxyException;
-import uchicago.src.sim.analysis.BinDataSource;
 import uchicago.src.sim.analysis.DataSource;
-import uchicago.src.sim.analysis.OpenHistogram;
 
-import uchicago.src.sim.analysis.DataSource;
-import uchicago.src.sim.analysis.OpenSequenceGraph;
 import uchicago.src.sim.analysis.Sequence;
 
 public class ParkingModel extends Repast3Launcher {
@@ -41,18 +36,16 @@ public class ParkingModel extends Repast3Launcher {
     private int worldXSize = WORLDXSIZE;
     private int worldYSize = WORLDYSIZE;
     private int agentLifeSpan = AGENT_LIFESPAN;
-    private ArrayList<Park> parkList;
-    private ArrayList<Driver> driverList;
+    protected ArrayList<Park> parkList;
+    protected ArrayList<Driver> driverList;
 
-    private ContainerController mainContainer;
+    protected ContainerController mainContainer;
 
-    private ParkingSpace pkspc;
+    protected ParkingSpace pkspc;
     private DisplaySurface displaySurf;
 
     private Schedule schedule;
-
     private OpenSequenceGraph amountOfMoneyInPark;
-   // private OpenHistogram agentWealthDistribution;
 
     class moneyInPark implements DataSource, Sequence {
 
@@ -64,13 +57,6 @@ public class ParkingModel extends Repast3Launcher {
             return (double)pkspc.getTotalMoney();
         }
     }
-    /*
-    class agentMoney implements BinDataSource{
-        public double getBinValue(Object o) {
-            Park park = (Park)o;
-            return (double)park.getTotalRevenue();
-        }
-    }*/
 
     @Override
     public void begin() {
@@ -103,15 +89,6 @@ public class ParkingModel extends Repast3Launcher {
         }
 
         schedule.scheduleActionAtInterval(10, new CarryDropUpdateMoneyInPark());
-
-/*
-        class CarryDropUpdateAgentWealth extends BasicAction {
-            public void execute(){
-                agentWealthDistribution.step();
-            }
-        }
-
-        schedule.scheduleActionAtInterval(10, new CarryDropUpdateAgentWealth());*/
     }
     private void buildDisplay() {
         System.out.println("Running buildDisplay...");
@@ -135,8 +112,7 @@ public class ParkingModel extends Repast3Launcher {
 
     @Override
     public String[] getInitParam() {
-        String[] initParams = { "NumParks", "NumDrivers", "WorldXSize", "WorldYSize", "AgentLifespan"};
-        return initParams;
+        return new String[]{ "NumParks", "NumDrivers", "WorldXSize", "WorldYSize", "AgentLifespan"};
     }
 
     @Override
@@ -159,15 +135,9 @@ public class ParkingModel extends Repast3Launcher {
             amountOfMoneyInPark.dispose();
         }
         amountOfMoneyInPark = null;
-/*
-        if (agentWealthDistribution != null){
-            agentWealthDistribution.dispose();
-        }
-        agentWealthDistribution = null;*/
 
         displaySurf = new DisplaySurface(this, "Carry Drop Model Window 1");
         amountOfMoneyInPark = new OpenSequenceGraph("Amount Of Money In Park",this);
-        //agentWealthDistribution = new OpenHistogram("Agent Wealth", 8, 0);
 
         registerDisplaySurface("Carry Drop Model Window 1", displaySurf);
         this.registerMediaProducer("Plot", amountOfMoneyInPark);
@@ -179,80 +149,6 @@ public class ParkingModel extends Repast3Launcher {
 
     @Override
     protected void launchJADE() {
-        Runtime rt = Runtime.instance();
-        Profile p1 = new ProfileImpl();
-        mainContainer = rt.createMainContainer(p1);
-        pkspc = new ParkingSpace(worldXSize, worldYSize);
-        launchAgents();
-    }
-
-    private Park createNewPark(){
-        // tipo (static ou dynamic), preco, nº lugares, x, y
-        // static, 10, 3, 49.3, 54.1
-        Object[] args = new Object[5];
-        args[0] = "static";
-        args[1] = "10"; // preco por h
-        args[2] = "3"; // nº total de lugares
-        args[3] = "2"; // isto e o y é melhor ser em Inteiro porcausa da grelha
-        args[4] = "5"; //
-        return new Park(args);
-    }
-
-    private Park createNewDynamicPark(){
-        // tipo (static ou dynamic), preco, nº lugares, x, y
-        // static, 10, 3, 49.3, 54.1
-        Object[] args = new Object[8];
-        args[0] = "dynamic";
-        args[1] = "10"; // preco por h
-        args[2] = "3"; // nº total de lugares
-        args[3] = "2"; // isto e o y é melhor ser em Inteiro porcausa da grelha
-        args[4] = "5"; //
-        args[5] = "1"; // learn rate
-        args[6] = "10"; // inflação por hora
-        args[7] = "100"; // percentagem de alteração de preço diára
-        return new Park(args);
-    }
-
-    private Driver createNewDriver(){
-        // args: tipo de driver(explorer, rational), xi, yi, xf, yf, maxMoney, maxDist, timePark
-        // explorer, 49.3, 49.4, 65.12, 12.2, 25, 100, 2
-        Object[] args = new Object[8];
-        args[0] = "explorer"; // tipo
-        args[1] = "32"; //xi
-        args[2] = "32"; // yi
-        args[3] = "47"; // xf
-        args[4] = "47"; // yf
-        args[5] = "25"; // max dinheiro a pagar por hora
-        args[6] = "100"; // distancia maxima a andar a pé
-        args[7] = "2"; // tempo de estacionamento
-        return new Driver(args, numParks);
-    }
-
-    private void launchAgents() {
-        try{
-            for(int i = 0; i < numParks; i++){
-                Park p = createNewPark();
-                if(pkspc.addPark(p)){
-                    parkList.add(p);
-                    mainContainer.acceptNewAgent("Park " + i, p).start();
-                }
-            }
-            for(int i = 0; i < numDrivers; i++){
-                Driver d = createNewDriver();
-                if(pkspc.addDriver(d)) {
-                    driverList.add(d);
-                    mainContainer.acceptNewAgent("Driver " + i, d).start();
-                }
-            }
-            mainContainer.acceptNewAgent("SimulationController 1", new SimulationController(numParks,numDrivers,500,4)).start();
-        } catch (StaleProxyException e){
-            e.printStackTrace();
-        }
-    }
-
-    public static void main(String[] args) {
-        SimInit init = new SimInit();
-        init.loadModel(new ParkingModel(), "", false);
     }
 
     public int getNumParks() {

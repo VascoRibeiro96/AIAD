@@ -1,4 +1,4 @@
-import anl.repast.gis.display.OpenMapDisplay;
+import repast.ParkingModel;
 import uchicago.src.sim.engine.SimInit;
 import java.util.Scanner;
 
