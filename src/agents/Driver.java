@@ -159,8 +159,13 @@ public class Driver extends Agent implements Drawable {
                 msgReceived++;
                 if(msgReceived == totalParks) {
                     end = true;
-                    addBehaviour(new DriverTravelParkBehaviour(myAgent,bestPark));
-                    addBehaviour(new DriverParkResponseBehaviour(myAgent));
+                    if(bestPark.utility < 0){
+                        addBehaviour(new DriverExitSceneBehaviour(myAgent));
+                    }
+                    else {
+                        addBehaviour(new DriverTravelParkBehaviour(myAgent,bestPark));
+                        addBehaviour(new DriverParkResponseBehaviour(myAgent));
+                    }
                 }
             }
         }
