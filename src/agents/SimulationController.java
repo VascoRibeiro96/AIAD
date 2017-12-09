@@ -16,6 +16,7 @@ public class SimulationController extends Agent{
     private final int totalDrivers;
     private final int ticksPerSimulation;
     private final int numberSimulations;
+    private int curSimulation = 0;
 
     class SimulationControllerBehaviour extends SimpleBehaviour{
 		private boolean end = false;
@@ -25,6 +26,7 @@ public class SimulationController extends Agent{
 
         private SimulationControllerBehaviour(Agent a){
             super(a);
+            curSimulation++;
         }
 
         @Override
@@ -41,6 +43,9 @@ public class SimulationController extends Agent{
                     }
                     else rejectMessage(msg);
                 }
+                else if(msg.getPerformative() == ACLMessage.UNKNOWN){
+                    System.err.println(msg.getContent());
+                }
                 else rejectMessage(msg);
             }
             block();
@@ -49,33 +54,38 @@ public class SimulationController extends Agent{
         private void updateDriverCount(){
             synchronized (lockInc) {
                 driversOut++;
-                if(driversOut == totalDrivers){
+                if(driversOut == totalDrivers && curSimulation < numberSimulations){
                     restartSimulation();
                 }
+                else if (curSimulation >= numberSimulations) end = true;
             }
         }
 
-        private void informParkEnd(){
-            // TODO enviar mensagem para os parques fecharem
-        }
-
-        // TODO mandar para os parques também
-        private void restartSimulation() {
-            // pesquisa DF por agentes "driver" para poder recomeçar a simulação
-            end = true;
+        private void sendMessageTo(String agentType, String content){
             DFAgentDescription template = new DFAgentDescription();
             ServiceDescription sd1 = new ServiceDescription();
-            sd1.setType("Agente Driver");
+            sd1.setType(agentType);
             template.addServices(sd1);
             try {
                 DFAgentDescription[] result = DFService.search(myAgent, template);
                 ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
                 for (DFAgentDescription aResult : result)
                     msg.addReceiver(aResult.getName());
-                msg.setContent("Start");
+                msg.setContent(content);
                 send(msg);
-                System.out.println("Started Drivers!");
+                System.out.println(getName() + " executed " + content);
             } catch(FIPAException e) { e.printStackTrace(); }
+        }
+
+        private void informParkEnd(){
+            sendMessageTo("Agente Park", "Close");
+        }
+
+        private void restartSimulation() {
+            // pesquisa DF por agentes "driver" para poder recomeçar a simulação
+            end = true;
+            sendMessageTo("Agente Driver", "Restart");
+            sendMessageTo("Agente Park", "Restart");
             addBehaviour(new SimulationControllerBehaviour(myAgent));
         }
 
@@ -112,6 +122,8 @@ public class SimulationController extends Agent{
         }
         // cria behaviour
         addBehaviour(new SimulationControllerBehaviour(this));
+
+        System.out.println("This simulation is going to start! Nº of parks + " + totalParks + " and Nº of" + totalDrivers );
     }   // fim do metodo setup
 
 

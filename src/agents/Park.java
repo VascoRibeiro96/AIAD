@@ -26,10 +26,11 @@ public class Park extends Agent implements Drawable {
 
     //ter logica do comportamento aqui?
     class ParkBehaviour extends SimpleBehaviour{
-		private static final long serialVersionUID = 1L;
+		// private static final long serialVersionUID = 1L;
 		private boolean end = false;
         private final Object lock2 = new Object();
         private double totalRevenue = 0;
+        private boolean close = false;
 
         private ParkBehaviour(Agent a){
             super(a);
@@ -45,12 +46,24 @@ public class Park extends Agent implements Drawable {
                         sendInformation(msg);
                     else if(msg.getContent().contains("leave,"))
                         freeSpot(msg);
+                    else if (msg.getContent().equals("Close")){
+                        close = true;
+                    }
+                    else if (msg.getContent().equals("Restart")){
+                        end = true;
+                        revenueStory.add(totalRevenue);
+                        spots = totalSpots;
+                        addBehaviour(new ParkBehaviour(myAgent));
+                    }
                     else rejectMessage(msg);
                 }
                 else if(msg.getPerformative() == ACLMessage.REQUEST){
                     System.out.println("A Driver wants to park!");
                     if(msg.getContent().equals("park"))
                         updateParking(msg);
+                }
+                else if(msg.getPerformative() == ACLMessage.UNKNOWN){
+                    System.err.println(msg.getContent());
                 }
                 else rejectMessage(msg);
                 msg = myAgent.receive();
@@ -63,7 +76,7 @@ public class Park extends Agent implements Drawable {
         private void updateParking(ACLMessage msg){
             ACLMessage reply = msg.createReply();
             synchronized (lock2) {
-                if(spots != 0){
+                if(spots != 0 && !close){
                     reply.setPerformative(ACLMessage.AGREE);
                     reply.setContent("success");
                     spots--;
@@ -72,7 +85,8 @@ public class Park extends Agent implements Drawable {
                 else{
                     reply.setPerformative(ACLMessage.REFUSE);
                     reply.setContent("unavailable");
-                    System.out.println(name + " is full!");
+                    if(!close)System.out.println(name + " is full!");
+                    else System.out.println("Park is closed!");
                 }
                 send(reply);
             }
