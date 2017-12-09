@@ -1,3 +1,4 @@
+import repast.Experience1;
 import repast.ParkingModel;
 import uchicago.src.sim.engine.SimInit;
 import java.util.Scanner;
@@ -30,7 +31,11 @@ public class Menu {
             switch (opcao) {
                 case 1:
                     SimInit init = new SimInit();
-                    init.loadModel(new ParkingModel(), "", false);
+                    Experience1 exp = new Experience1();
+                    exp.setNumDrivers(1);
+                    exp.setNumParks(1);
+                    init.loadModel(exp, "", false);
+                    break;
                 case 2:
                     break;
                 case 3:

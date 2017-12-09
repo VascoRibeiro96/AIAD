@@ -41,7 +41,7 @@ public class Park extends Agent implements Drawable {
         private ParkBehaviour(Agent a){
             super(a);
             System.out.println(name + " opened!");
-            totalRevenue = 0;
+            revenue = 0;
         }
 
         @Override

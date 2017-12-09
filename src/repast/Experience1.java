@@ -78,7 +78,7 @@ public class Experience1 extends ParkingModel{
                     mainContainer.acceptNewAgent("Driver " + i, d).start();
                 }
             }
-            SimulationController sm = new SimulationController(getNumParks(),getNumDrivers(),500,4);
+            SimulationController sm = new SimulationController(getNumParks(),getNumDrivers(),500,1);
             mainContainer.acceptNewAgent("SimulationController 1", sm).start();
         } catch (StaleProxyException e){
             e.printStackTrace();
@@ -87,6 +87,9 @@ public class Experience1 extends ParkingModel{
 
     public static void main(String[] args) {
         SimInit init = new SimInit();
-        init.loadModel(new Experience1(), "", false);
+        Experience1 exp = new Experience1();
+        exp.setNumDrivers(1);
+        exp.setNumParks(1);
+        init.loadModel(exp, "", false);
     }
 }
