@@ -217,7 +217,7 @@ public class ParkingModel extends Repast3Launcher {
         // args: tipo de driver(explorer, rational), xi, yi, xf, yf, maxMoney, maxDist, timePark
         // explorer, 49.3, 49.4, 65.12, 12.2, 25, 100, 2
         Object[] args = new Object[8];
-        args[0] = "rational"; // tipo
+        args[0] = "explorer"; // tipo
         args[1] = "32"; //xi
         args[2] = "32"; // yi
         args[3] = "47"; // xf

@@ -156,15 +156,24 @@ public class Driver extends Agent implements Drawable {
             double hourInflation = Double.parseDouble(values[6]);
             ParkInfo p = new ParkInfo(name,type,price,x,y,hourInflation);
             synchronized (lock1){ // evitar problemas de concurrencia. Funciona como um lock
-                if(bestPark == null || bestPark.utility < p.getUtility(utility,timePark,dest)){
-                    bestPark = p;
-                    System.out.println("New util best for " + name + "! " + bestPark.getUtility(utility,timePark,dest));
+                if(type.equals("rational")){
+                    if(bestPark == null || bestPark.utility < p.getUtility(utility,timePark,dest)){
+                        bestPark = p;
+                        System.out.println("New util best for " + name + "! " + bestPark.getUtility(utility,timePark,dest));
+                    }
+                }
+                else{
+                    p.getUtility(utility,timePark,dest);
+                    p.distanceTo = p.location.calculateDistance(dest);
+                    if(bestPark == null || bestPark.distanceTo > p.distanceTo){
+                        bestPark = p;
+                    }
                 }
                 parkUtilities.add(p);
                 msgReceived++;
                 if(msgReceived == totalParks) {
                     end = true;
-                    if(bestPark.utility < 0){
+                    if(bestPark.utility < 0 && type.equals("rational")){
                         addBehaviour(new DriverExitSceneBehaviour(myAgent));
                     }
                     else {
@@ -289,22 +298,39 @@ public class Driver extends Agent implements Drawable {
             ParkInfo goodPark = null;
             for(ParkInfo park : parkUtilities){
                 if(parksFull.contains(park.name))continue;
-                if(park.utility <= 0){
-                    parksFull.add(park.name);
-                    continue;
+                if(type.equals("rational")){
+                    if(park.utility <= 0){
+                        parksFull.add(park.name);
+                        continue;
+                    }
+                    if(goodPark == null || goodPark.utility < park.getUtility(utility,timePark,dest))
+                        goodPark = park;
                 }
-                if(goodPark == null || goodPark.utility < park.getUtility(utility,timePark,dest))
-                    goodPark = park;
+                else{
+                    if(goodPark == null || goodPark.distanceTo > park.distanceTo)
+                        goodPark = park;
+                }
             }
             if(goodPark == null) return;
             park2park = goodPark;
         }
 
         private void parkDriver(){
-            addBehaviour(new DriverWalkToDestBehaviour(myAgent,park2park));
-            //verde
-            curimageFile = new File("icons/greencar.png");
-            end = true;
+            if(type.equals("explorer") && park2park.utility < 0){
+                updatePark2Park();
+                if(parksFull.size() != parkUtilities.size())
+                    addBehaviour(new DriverTravelParkBehaviour(myAgent,park2park));
+                else {
+                    end = true;
+                    addBehaviour(new DriverExitSceneBehaviour(myAgent));
+                }
+            }
+            else {
+                addBehaviour(new DriverWalkToDestBehaviour(myAgent,park2park));
+                //verde
+                curimageFile = new File("icons/greencar.png");
+                end = true;
+            }
         }
 
         @Override
@@ -347,8 +373,6 @@ public class Driver extends Agent implements Drawable {
                     }
                 }
             }
-
-
         }
 
         @Override
