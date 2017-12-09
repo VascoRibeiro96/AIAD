@@ -47,6 +47,7 @@ public class SimulationController extends Agent{
                     System.err.println(msg.getContent());
                 }
                 else rejectMessage(msg);
+                msg = myAgent.receive();
             }
             block();
         }
