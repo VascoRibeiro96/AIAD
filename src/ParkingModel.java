@@ -164,7 +164,7 @@ public class ParkingModel extends Repast3Launcher {
                     mainContainer.acceptNewAgent("Driver " + i, d).start();
                 }
             }
-            mainContainer.acceptNewAgent("SimulationController 1", new SimulationController(numParks,numDrivers,750,4)).start();
+            mainContainer.acceptNewAgent("SimulationController 1", new SimulationController(numParks,numDrivers,500,4)).start();
         } catch (StaleProxyException e){
             e.printStackTrace();
         }

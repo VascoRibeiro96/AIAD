@@ -17,6 +17,7 @@ public class SimulationController extends Agent{
     private final int ticksPerSimulation;
     private final int numberSimulations;
     private int curSimulation = 0;
+    private boolean nextSimulation = false;
 
     private boolean sendMessageTo(String agentType, String content, int cond){
         DFAgentDescription template = new DFAgentDescription();
@@ -40,20 +41,17 @@ public class SimulationController extends Agent{
     class SimulationControllerBehaviour extends SimpleBehaviour{
 		private boolean end = false;
 		private int driversOut = 0;
-		private int curTick = 0;
 		private final Object lockInc = new Object();
 
         private SimulationControllerBehaviour(Agent a){
             super(a);
             curSimulation++;
+            nextSimulation = false;
+            addBehaviour(new SimulationTimerBehavior(myAgent));
         }
 
         @Override
         public void action() {
-            curTick++;
-            if(curTick == ticksPerSimulation){ // should only happen once am i right?
-                informParkEnd();
-            }
             ACLMessage msg = myAgent.receive();
             while (msg != null) {
                 if (msg.getPerformative() == ACLMessage.INFORM) {
@@ -74,20 +72,11 @@ public class SimulationController extends Agent{
         private void updateDriverCount(){
             synchronized (lockInc) {
                 driversOut++;
-                if(driversOut == totalDrivers && curSimulation < numberSimulations){
-                    restartSimulation();
+                if(driversOut == totalDrivers){
+                    end = true;
+                    addBehaviour(new SimulationWait4TimerBehaviour(myAgent));
                 }
-                else if (curSimulation >= numberSimulations) end = true;
             }
-        }
-
-        private void informParkEnd(){
-            sendMessageTo("Agente Park", "Close", totalParks);
-        }
-
-        private void restartSimulation() {
-            end = true;
-            addBehaviour(new SimulationWait4OkBehaviour(myAgent));
         }
 
         private void rejectMessage(ACLMessage msg){
@@ -99,6 +88,60 @@ public class SimulationController extends Agent{
         }
 
         public boolean done(){return end;}
+    }
+
+    class SimulationWait4TimerBehaviour extends SimpleBehaviour{
+        private boolean end = false;
+
+        private SimulationWait4TimerBehaviour(Agent a){
+            super(a);
+        }
+
+        @Override
+        public void action() {
+            if(curSimulation < numberSimulations && nextSimulation){
+                restartSimulation();
+            }
+            else if (curSimulation >= numberSimulations) {
+                System.err.println("End of Simulation!!");
+                end = true;
+            }
+        }
+
+        private void restartSimulation() {
+            end = true;
+            addBehaviour(new SimulationWait4OkBehaviour(myAgent));
+        }
+
+        @Override
+        public boolean done() {
+            return end;
+        }
+    }
+
+    class SimulationTimerBehavior extends SimpleBehaviour{
+        private boolean end = false;
+        private int curTick = 0;
+
+        private SimulationTimerBehavior(Agent a){
+            super(a);
+        }
+
+        @Override
+        public void action() {
+            curTick++;
+            if(curTick >= ticksPerSimulation){ // should only happen once am i right?
+                if(sendMessageTo("Agente Park", "Close", totalParks)){
+                    end = true;
+                    nextSimulation = true;
+                }
+            }
+        }
+
+        @Override
+        public boolean done() {
+            return end;
+        }
     }
 
     class SimulationWait4OkBehaviour extends SimpleBehaviour{

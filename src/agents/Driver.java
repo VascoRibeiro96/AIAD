@@ -132,7 +132,6 @@ public class Driver extends Agent implements Drawable {
             ACLMessage msg = myAgent.receive();
             while (msg != null){
                 if(msg.getPerformative() == ACLMessage.INFORM) {
-                    System.out.println(getLocalName() + ": recebi " + msg.getContent());
                     if (msg.getContent().contains("retInfo,"))
                         updateParkUtils(msg);
                     else rejectMessage(msg);

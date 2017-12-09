@@ -107,7 +107,6 @@ public class Park extends Agent implements Drawable {
             ACLMessage reply = msg.createReply();
             // preenche conteudo da mensagem
             String answer = "retInfo," + name + "," + price + "," + location + "," + type;
-            System.out.println(name + " Sent " + answer);
             reply.setContent(answer);
             // envia mensagem
             send(reply);
