@@ -153,7 +153,8 @@ public class Driver extends Agent implements Drawable {
             double x = Double.parseDouble(values[3]);
             double y = Double.parseDouble(values[4]);
             String type = values[5];
-            ParkInfo p = new ParkInfo(name,type,price,x,y);
+            double hourInflation = Double.parseDouble(values[6]);
+            ParkInfo p = new ParkInfo(name,type,price,x,y,hourInflation);
             synchronized (lock1){ // evitar problemas de concurrencia. Funciona como um lock
                 if(bestPark == null || bestPark.utility < p.getUtility(utility,timePark,dest)){
                     bestPark = p;

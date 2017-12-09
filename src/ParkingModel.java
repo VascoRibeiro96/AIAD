@@ -131,6 +131,21 @@ public class ParkingModel extends Repast3Launcher {
         return new Park(args);
     }
 
+    private Park createNewDynamicPark(){
+        // tipo (static ou dynamic), preco, nº lugares, x, y
+        // static, 10, 3, 49.3, 54.1
+        Object[] args = new Object[8];
+        args[0] = "dynamic";
+        args[1] = "10"; // preco por h
+        args[2] = "3"; // nº total de lugares
+        args[3] = "2"; // isto e o y é melhor ser em Inteiro porcausa da grelha
+        args[4] = "5"; //
+        args[5] = "1"; // learn rate
+        args[6] = "10"; // inflação por hora
+        args[7] = "100"; // percentagem de alteração de preço diára
+        return new Park(args);
+    }
+
     private Driver createNewDriver(){
         // args: tipo de driver(explorer, rational), xi, yi, xf, yf, maxMoney, maxDist, timePark
         // explorer, 49.3, 49.4, 65.12, 12.2, 25, 100, 2
@@ -149,7 +164,7 @@ public class ParkingModel extends Repast3Launcher {
     private void launchAgents() {
         try{
             for(int i = 0; i < numParks; i++){
-                Park p = createNewPark();
+                Park p = createNewDynamicPark();
                 if(pkspc.addPark(p)){
                     parkList.add(p);
                     mainContainer.acceptNewAgent("Park " + i, p).start();

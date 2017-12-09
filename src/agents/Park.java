@@ -18,11 +18,16 @@ import java.util.ArrayList;
 public class Park extends Agent implements Drawable {
     private String name;
     private double price;
+    private double initialPrice;
     private int totalSpots;
 	private int spots; // nº de lugares vagos
     private String type;
     private ArrayList<Double> revenueStory;
     private Coords location;
+
+    private double learnRate = 0;
+    private double hourInflation = 0;
+    private double percentChange = 0;
 
     //ter logica do comportamento aqui?
     class ParkBehaviour extends SimpleBehaviour{
@@ -52,6 +57,22 @@ public class Park extends Agent implements Drawable {
                     }
                     else if (msg.getContent().equals("RestartPark")){
                         end = true;
+                        if(type.equals("dynamic")) {
+                            if(revenueStory.size() == 0){
+                                if(totalRevenue > 0){
+                                    price += price * learnRate * (percentChange/100 - 1);
+                                }
+                                else price -= price * learnRate * (percentChange/100 - 1);
+                            }
+                            else {
+                                if(revenueStory.get(revenueStory.size()-1) < totalRevenue){
+                                    price += price * learnRate * (percentChange/100 - 1);
+                                }
+                                else{
+                                    price -= price * learnRate * (percentChange/100 - 1);
+                                }
+                            }
+                        }
                         revenueStory.add(totalRevenue);
                         spots = totalSpots;
                         addBehaviour(new ParkBehaviour(myAgent));
@@ -106,7 +127,7 @@ public class Park extends Agent implements Drawable {
             // cria resposta
             ACLMessage reply = msg.createReply();
             // preenche conteudo da mensagem
-            String answer = "retInfo," + name + "," + price + "," + location + "," + type;
+            String answer = "retInfo," + name + "," + price + "," + location + "," + type + "," + hourInflation;
             reply.setContent(answer);
             // envia mensagem
             send(reply);
@@ -129,16 +150,22 @@ public class Park extends Agent implements Drawable {
 
     // tem de ter 5 argumentos por esta ordem: tipo (static ou dynamic), preço, nº lugares, Longitude(ou x), Latitude(ou y)
     // exemplo static, 10, 3, 49.3, 54.1
-
+    // se for dynamic tem mais 3 argumentos learnRate, inflação e percentagem de alteração de preço
     private void initVariables(Object[] args){
     	type = (String) args[0];
         price = Double.parseDouble((String) args[1]);
+        initialPrice = price;
         spots = Integer.parseInt((String) args[2]);
         totalSpots = spots;
         double x = Double.parseDouble((String) args[3]);
         double y = Double.parseDouble((String) args[4]);
         location = new Coords(x,y);
         revenueStory = new ArrayList<>();
+        if(type.equals("dynamic")){
+            learnRate = Double.parseDouble((String) args[5]);
+            hourInflation = Double.parseDouble((String) args[6]);
+            percentChange = Double.parseDouble((String) args[7]);
+        }
     }
     
     public Park(Object[] args){
