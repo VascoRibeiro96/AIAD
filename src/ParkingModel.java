@@ -11,6 +11,7 @@ import repast.ParkingSpace;
 import sajas.core.Runtime;
 import sajas.sim.repast3.Repast3Launcher;
 import sajas.wrapper.ContainerController;
+import uchicago.src.sim.analysis.OpenSequenceGraph;
 import uchicago.src.sim.engine.BasicAction;
 import uchicago.src.sim.engine.Schedule;
 import uchicago.src.sim.engine.SimInit;
@@ -20,6 +21,13 @@ import uchicago.src.sim.gui.Object2DDisplay;
 import uchicago.src.sim.gui.Value2DDisplay;
 import uchicago.src.sim.util.SimUtilities;
 import jade.wrapper.StaleProxyException;
+import uchicago.src.sim.analysis.BinDataSource;
+import uchicago.src.sim.analysis.DataSource;
+import uchicago.src.sim.analysis.OpenHistogram;
+
+import uchicago.src.sim.analysis.DataSource;
+import uchicago.src.sim.analysis.OpenSequenceGraph;
+import uchicago.src.sim.analysis.Sequence;
 
 public class ParkingModel extends Repast3Launcher {
     private static final int NUMPARKS = 10;
@@ -43,6 +51,27 @@ public class ParkingModel extends Repast3Launcher {
 
     private Schedule schedule;
 
+    private OpenSequenceGraph amountOfMoneyInPark;
+   // private OpenHistogram agentWealthDistribution;
+
+    class moneyInPark implements DataSource, Sequence {
+
+        public Object execute() {
+            return new Double(getSValue());
+        }
+
+        public double getSValue() {
+            return (double)pkspc.getTotalMoney();
+        }
+    }
+    /*
+    class agentMoney implements BinDataSource{
+        public double getBinValue(Object o) {
+            Park park = (Park)o;
+            return (double)park.getTotalRevenue();
+        }
+    }*/
+
     @Override
     public void begin() {
         super.begin();
@@ -50,6 +79,8 @@ public class ParkingModel extends Repast3Launcher {
         buildSchedule();
         buildDisplay();
         displaySurf.display();
+        amountOfMoneyInPark.display();
+        //   agentWealthDistribution.display();
     }
 
     private void buildModel() {
@@ -64,6 +95,23 @@ public class ParkingModel extends Repast3Launcher {
             }
         }
         schedule.scheduleActionBeginning(0,new UpdateBoard());
+
+        class CarryDropUpdateMoneyInPark extends BasicAction {
+            public void execute(){
+                amountOfMoneyInPark.step();
+            }
+        }
+
+        schedule.scheduleActionAtInterval(10, new CarryDropUpdateMoneyInPark());
+
+/*
+        class CarryDropUpdateAgentWealth extends BasicAction {
+            public void execute(){
+                agentWealthDistribution.step();
+            }
+        }
+
+        schedule.scheduleActionAtInterval(10, new CarryDropUpdateAgentWealth());*/
     }
     private void buildDisplay() {
         System.out.println("Running buildDisplay...");
@@ -76,6 +124,8 @@ public class ParkingModel extends Repast3Launcher {
         displayDrivers.setObjectList(driverList);
         displaySurf.addDisplayableProbeable(displayMap, "Map");
         displaySurf.addDisplayableProbeable(displayDrivers, "Drivers");
+        amountOfMoneyInPark.addSequence("Money In Park", new moneyInPark());
+        //  agentWealthDistribution.createHistogramItem("Agent Wealth",parkList,new agentMoney());
     }
 
     @Override
@@ -104,10 +154,27 @@ public class ParkingModel extends Repast3Launcher {
             displaySurf.dispose();
         }
         displaySurf = null;
+
+        if (amountOfMoneyInPark != null){
+            amountOfMoneyInPark.dispose();
+        }
+        amountOfMoneyInPark = null;
+/*
+        if (agentWealthDistribution != null){
+            agentWealthDistribution.dispose();
+        }
+        agentWealthDistribution = null;*/
+
         displaySurf = new DisplaySurface(this, "Carry Drop Model Window 1");
+        amountOfMoneyInPark = new OpenSequenceGraph("Amount Of Money In Park",this);
+        //agentWealthDistribution = new OpenHistogram("Agent Wealth", 8, 0);
+
         registerDisplaySurface("Carry Drop Model Window 1", displaySurf);
+        this.registerMediaProducer("Plot", amountOfMoneyInPark);
         super.setup();
         schedule = super.getSchedule();
+
+
     }
 
     @Override
@@ -164,7 +231,7 @@ public class ParkingModel extends Repast3Launcher {
     private void launchAgents() {
         try{
             for(int i = 0; i < numParks; i++){
-                Park p = createNewDynamicPark();
+                Park p = createNewPark();
                 if(pkspc.addPark(p)){
                     parkList.add(p);
                     mainContainer.acceptNewAgent("Park " + i, p).start();

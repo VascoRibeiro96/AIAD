@@ -102,4 +102,20 @@ public class ParkingSpace {
 	public Object2DGrid getMapSpace() {
 		return mapSpace;
 	}
+
+
+	public int getTotalMoney(){
+		int totalMoney = 0;
+		for(int k = 0; k < 100; k++){
+			for(int l = 0; l < 100; l++){
+				Park park = getParkAt(k,l); //ver coordenadas dos parks
+				if(park != null){
+					totalMoney += park.getTotalRevenue();//park.getPrice()*(park.getTotalSpots() - park.getSpots());
+				}
+			}
+		}
+
+		return totalMoney;
+
+	}
 }

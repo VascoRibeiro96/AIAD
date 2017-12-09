@@ -18,6 +18,7 @@ import java.util.ArrayList;
 public class Park extends Agent implements Drawable {
     private String name;
     private double price;
+    private double revenue;
     private double initialPrice;
     private int totalSpots;
 	private int spots; // nº de lugares vagos
@@ -40,6 +41,7 @@ public class Park extends Agent implements Drawable {
         private ParkBehaviour(Agent a){
             super(a);
             System.out.println(name + " opened!");
+            totalRevenue = 0;
         }
 
         @Override
@@ -119,6 +121,7 @@ public class Park extends Agent implements Drawable {
                 spots++;
                 String[] splitMsg = msg.getContent().split(",");
                 totalRevenue += Double.parseDouble(splitMsg[1]) * price;
+                revenue = totalRevenue;
                 System.out.println(name + " total revenue of the day increased to " + totalRevenue);
             }
         }
@@ -241,9 +244,15 @@ public class Park extends Agent implements Drawable {
 		this.price = price;
 	}
 
+    public int getTotalSpots() {
+        return totalSpots;
+    }
+
 	public int getSpots() {
 		return spots;
 	}
+
+	public double getTotalRevenue() {return revenue;}
 
 	public void setSpots(int spots) {
 		this.spots = spots;
