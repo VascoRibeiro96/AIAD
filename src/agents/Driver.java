@@ -34,8 +34,6 @@ public class Driver extends Agent implements Drawable {
     private ParkInfo bestPark = null;
     private final int totalParks;
 
-    private final Object lock1 = new Object();
-
     // cor dentro do carro = azul, fora = verde, a sair de cena = vermelho
     private Color curColor = Color.blue;
 
@@ -123,6 +121,7 @@ public class Driver extends Agent implements Drawable {
     class DriverReceiveInfoBehaviour extends SimpleBehaviour {
         private boolean end = false;
         private int msgReceived = 0;
+        private final Object lock1 = new Object();
 
         private DriverReceiveInfoBehaviour(Agent a){
             super(a);
@@ -348,7 +347,7 @@ public class Driver extends Agent implements Drawable {
     }
 
     class DriverWaitRestartBehaviour extends SimpleBehaviour{
-        private boolean end = true;
+        private boolean end = false;
 
         private DriverWaitRestartBehaviour(Agent a){
             super(a);

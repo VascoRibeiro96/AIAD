@@ -34,6 +34,7 @@ public class Park extends Agent implements Drawable {
 
         private ParkBehaviour(Agent a){
             super(a);
+            System.out.println(name + " opened!");
         }
 
         @Override
@@ -49,7 +50,7 @@ public class Park extends Agent implements Drawable {
                     else if (msg.getContent().equals("Close")){
                         close = true;
                     }
-                    else if (msg.getContent().equals("Restart")){
+                    else if (msg.getContent().equals("RestartPark")){
                         end = true;
                         revenueStory.add(totalRevenue);
                         spots = totalSpots;

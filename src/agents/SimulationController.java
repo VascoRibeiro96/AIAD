@@ -18,6 +18,25 @@ public class SimulationController extends Agent{
     private final int numberSimulations;
     private int curSimulation = 0;
 
+    private boolean sendMessageTo(String agentType, String content, int cond){
+        DFAgentDescription template = new DFAgentDescription();
+        ServiceDescription sd1 = new ServiceDescription();
+        sd1.setType(agentType);
+        template.addServices(sd1);
+        try {
+            DFAgentDescription[] result = DFService.search(this, template);
+            if(result.length == cond){
+                ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+                for (DFAgentDescription aResult : result)
+                    msg.addReceiver(aResult.getName());
+                msg.setContent(content);
+                send(msg);
+                return true;
+            }
+        } catch(FIPAException e) { e.printStackTrace(); }
+        return false;
+    }
+
     class SimulationControllerBehaviour extends SimpleBehaviour{
 		private boolean end = false;
 		private int driversOut = 0;
@@ -32,10 +51,10 @@ public class SimulationController extends Agent{
         @Override
         public void action() {
             curTick++;
-            ACLMessage msg = myAgent.receive();
             if(curTick == ticksPerSimulation){ // should only happen once am i right?
                 informParkEnd();
             }
+            ACLMessage msg = myAgent.receive();
             while (msg != null) {
                 if (msg.getPerformative() == ACLMessage.INFORM) {
                     if(msg.getContent().equals("driverOut")) {
@@ -62,32 +81,13 @@ public class SimulationController extends Agent{
             }
         }
 
-        private void sendMessageTo(String agentType, String content){
-            DFAgentDescription template = new DFAgentDescription();
-            ServiceDescription sd1 = new ServiceDescription();
-            sd1.setType(agentType);
-            template.addServices(sd1);
-            try {
-                DFAgentDescription[] result = DFService.search(myAgent, template);
-                ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-                for (DFAgentDescription aResult : result)
-                    msg.addReceiver(aResult.getName());
-                msg.setContent(content);
-                send(msg);
-            } catch(FIPAException e) { e.printStackTrace(); }
-        }
-
         private void informParkEnd(){
-            sendMessageTo("Agente Park", "Close");
+            sendMessageTo("Agente Park", "Close", totalParks);
         }
 
         private void restartSimulation() {
-            // pesquisa DF por agentes "driver" para poder recomeçar a simulação
             end = true;
-            sendMessageTo("Agente Driver", "Restart");
-            sendMessageTo("Agente Park", "Restart");
-            System.out.println("Begining new simulation!");
-            addBehaviour(new SimulationControllerBehaviour(myAgent));
+            addBehaviour(new SimulationWait4OkBehaviour(myAgent));
         }
 
         private void rejectMessage(ACLMessage msg){
@@ -99,6 +99,34 @@ public class SimulationController extends Agent{
         }
 
         public boolean done(){return end;}
+    }
+
+    class SimulationWait4OkBehaviour extends SimpleBehaviour{
+        private boolean end = false;
+        private boolean sentParks = false;
+        private boolean sentDrivers = false;
+
+        private SimulationWait4OkBehaviour(Agent a){
+            super(a);
+        }
+
+        @Override
+        public void action() {
+            if(!sentParks)
+                sentParks = sendMessageTo("Agente Park", "RestartPark", totalParks);
+            if(sentParks && !sentDrivers)
+                sentDrivers = sendMessageTo("Agente Driver", "RestartDriver", totalDrivers);
+            if(sentDrivers){
+                System.err.println("Starting new Simulation!");
+                end = true;
+                addBehaviour(new SimulationControllerBehaviour(myAgent));
+            }
+        }
+
+        @Override
+        public boolean done() {
+            return end;
+        }
     }
 
     public SimulationController(int totalParks, int totalDrivers, int ticksPerSimulation, int numberSimulations){
