@@ -12,7 +12,11 @@ import sajas.domain.DFService;
 import uchicago.src.sim.gui.Drawable;
 import uchicago.src.sim.gui.SimGraphics;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import static java.lang.Thread.sleep;
@@ -35,7 +39,7 @@ public class Driver extends Agent implements Drawable {
     private final int totalParks;
 
     // cor dentro do carro = azul, fora = verde, a sair de cena = vermelho
-    private Color curColor = Color.blue;
+    private  File curimageFile = new File("icons/bluecar.png");
 
 
     // TODO dp por variávies aleatórias para isto aqui em cima
@@ -209,7 +213,8 @@ public class Driver extends Agent implements Drawable {
 
         private DriverExitSceneBehaviour(Agent a){
             super(a);
-            curColor = Color.red;
+            //Vermelho
+            curimageFile = new File("icons/redcar.png");
         }
 
         @Override
@@ -296,7 +301,8 @@ public class Driver extends Agent implements Drawable {
 
         private void parkDriver(){
             addBehaviour(new DriverWalkToDestBehaviour(myAgent,park2park));
-            curColor = Color.green;
+            //verde
+            curimageFile = new File("icons/greencar.png");
             end = true;
         }
 
@@ -364,7 +370,8 @@ public class Driver extends Agent implements Drawable {
                 if(msg.getPerformative() == ACLMessage.INFORM) {
                     if (msg.getContent().contains("Restart")){
                         end = true;
-                        curColor = Color.blue;
+                        //Azul
+                        curimageFile = new File("icons/bluecar.png");
                         bestPark = null; // se calhar isto até nem era preciso
                         parkUtilities = new ArrayList<>();
                         addBehaviour(new DriverQueryBehaviour(myAgent));
@@ -451,7 +458,13 @@ public class Driver extends Agent implements Drawable {
 
     @Override
     public void draw(SimGraphics simGraphics) {
-        simGraphics.drawRoundRect(curColor);
+        BufferedImage image = null;
+        try {
+           image = ImageIO.read(curimageFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        simGraphics.drawImageScaled(image);
     }
 
     @Override

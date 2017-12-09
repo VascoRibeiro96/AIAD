@@ -72,10 +72,8 @@ public class ParkingModel extends Repast3Launcher {
         map.mapColor(1, Color.white);
         map.mapColor(2, Color.yellow);
         Value2DDisplay displayMap = new Value2DDisplay(pkspc.getMapSpace(), map);
-
         Object2DDisplay displayDrivers = new Object2DDisplay(pkspc.getDriverSpace());
         displayDrivers.setObjectList(driverList);
-
         displaySurf.addDisplayableProbeable(displayMap, "Map");
         displaySurf.addDisplayableProbeable(displayDrivers, "Drivers");
     }

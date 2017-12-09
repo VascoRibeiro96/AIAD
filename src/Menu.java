@@ -1,3 +1,4 @@
+import anl.repast.gis.display.OpenMapDisplay;
 import uchicago.src.sim.engine.SimInit;
 import java.util.Scanner;
 
