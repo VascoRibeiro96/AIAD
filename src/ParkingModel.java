@@ -68,7 +68,7 @@ public class ParkingModel extends Repast3Launcher {
     private void buildDisplay() {
         System.out.println("Running buildDisplay...");
         ColorMap map = new ColorMap();
-        map.mapColor(0, Color.black);
+        map.mapColor(0, Color.white);
         map.mapColor(1, Color.white);
         map.mapColor(2, Color.yellow);
         Value2DDisplay displayMap = new Value2DDisplay(pkspc.getMapSpace(), map);
