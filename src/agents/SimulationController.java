@@ -74,7 +74,6 @@ public class SimulationController extends Agent{
                     msg.addReceiver(aResult.getName());
                 msg.setContent(content);
                 send(msg);
-                System.out.println(getName() + " executed " + content);
             } catch(FIPAException e) { e.printStackTrace(); }
         }
 
@@ -87,6 +86,7 @@ public class SimulationController extends Agent{
             end = true;
             sendMessageTo("Agente Driver", "Restart");
             sendMessageTo("Agente Park", "Restart");
+            System.out.println("Begining new simulation!");
             addBehaviour(new SimulationControllerBehaviour(myAgent));
         }
 

@@ -216,7 +216,20 @@ public class Driver extends Agent implements Drawable {
                 updateCurCoords(cur,start);
             }
             else {
-                end = true;
+                end = true; // driverOut
+                DFAgentDescription template = new DFAgentDescription();
+                ServiceDescription sd1 = new ServiceDescription();
+                sd1.setType("Agente SimulationController");
+                template.addServices(sd1);
+                try {
+                    DFAgentDescription[] result = DFService.search(myAgent, template);
+                    ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+                    for (DFAgentDescription aResult : result)
+                        msg.addReceiver(aResult.getName());
+                    msg.setContent("driverOut");
+                    send(msg);
+                } catch(FIPAException e) { e.printStackTrace(); }
+                addBehaviour(new DriverWaitRestartBehaviour(myAgent));
             }
         }
 
@@ -334,6 +347,40 @@ public class Driver extends Agent implements Drawable {
         }
     }
 
+    class DriverWaitRestartBehaviour extends SimpleBehaviour{
+        private boolean end = true;
+
+        private DriverWaitRestartBehaviour(Agent a){
+            super(a);
+        }
+
+        @Override
+        public void action() {
+            ACLMessage msg = myAgent.receive();
+            while (msg != null){
+                if(msg.getPerformative() == ACLMessage.INFORM) {
+                    if (msg.getContent().contains("Restart")){
+                        end = true;
+                        curColor = Color.blue;
+                        bestPark = null; // se calhar isto até nem era preciso
+                        parkUtilities = new ArrayList<>();
+                        addBehaviour(new DriverQueryBehaviour(myAgent));
+                        addBehaviour(new DriverReceiveInfoBehaviour(myAgent));
+                    }
+                    else rejectMessage(msg);
+                }
+                else rejectMessage(msg);
+                msg = myAgent.receive();
+            }
+            block();
+        }
+
+        @Override
+        public boolean done() {
+            return end;
+        }
+    }
+
     private void initVariables(Object[] args){
         type = (String) args[0];
         double xi =Double.parseDouble((String) args[1]);
@@ -357,21 +404,6 @@ public class Driver extends Agent implements Drawable {
     }
 
     protected void setup() {
-    	/*
-        Object[] args = getArguments();
-        if(args != null && args.length == 8) {
-            initVariables(args);
-        } else {
-            System.err.println("Missing Parameters!");
-            return;
-        }
-
-        if(type.equals("") || !(type.equals("explorer") || type.equals("rational"))){
-            System.err.println("Introduced wrong type for driver!");
-            System.err.println("Typed introduced: " + type);
-            return;
-        }
-		*/
         // regista agente no DF
         name = getName();
         DFAgentDescription dfd = new DFAgentDescription();
@@ -386,8 +418,6 @@ public class Driver extends Agent implements Drawable {
             e.printStackTrace();
         }
 
-        // cria behaviour
-        //Driver.DriverBehaviour b = new Driver.DriverBehaviour(this);
         // addBehaviour(b);
         addBehaviour(new DriverQueryBehaviour(this));
         addBehaviour(new DriverReceiveInfoBehaviour(this));
@@ -429,10 +459,5 @@ public class Driver extends Agent implements Drawable {
     @Override
     public int getY() {
         return curY;
-    }
-
-    public void stepi(){
-        curX ++;
-        curY --;
     }
 }
