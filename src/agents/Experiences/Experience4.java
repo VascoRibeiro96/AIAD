@@ -52,7 +52,7 @@ public class Experience4 extends ParkingModel {
         // explorer, 49.3, 49.4, 65.12, 12.2, 25, 100, 2
         Object[] args = new Object[8];
         args[0] = "rational"; // tipo
-        args[1] = "25"; //xi
+        args[1] = "50"; //xi
         args[2] = "0"; // yi
         args[3] = "50"; // xf
         args[4] = "50"; // yf
@@ -81,7 +81,7 @@ public class Experience4 extends ParkingModel {
                 mainContainer.acceptNewAgent("Driver " + i, d).start();
 
             }
-            SimulationController sm = new SimulationController(getNumParks(),getNumDrivers(),300,1);
+            SimulationController sm = new SimulationController(getNumParks(),getNumDrivers(),400,1);
             mainContainer.acceptNewAgent("SimulationController 1", sm).start();
         } catch (StaleProxyException e){
             e.printStackTrace();

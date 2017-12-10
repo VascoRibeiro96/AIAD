@@ -97,7 +97,7 @@ public class Driver extends Agent implements Drawable {
         for(ParkInfo park : parkUtilities){
             if(parksFull.contains(park.name))continue;
             if(type.equals("rational")){
-                if(park.utility <= 0){
+                if(park.utility < 0){
                     parksFull.add(park.name);
                     continue;
                 }
@@ -377,7 +377,7 @@ public class Driver extends Agent implements Drawable {
                     else{
                         end = true;
                         String msgContent = "leave," + timePark;
-                        parkRequest(ACLMessage.INFORM,msgContent, park2park);
+                        parkRequest(ACLMessage.INFORM,msgContent, this.park2park);
                         addBehaviour(new DriverExitSceneBehaviour(myAgent));
                     }
                 }
