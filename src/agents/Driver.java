@@ -174,18 +174,17 @@ public class Driver extends Agent implements Drawable {
 
         private void updateParkUtils(ACLMessage msg){
             String[] values = msg.getContent().split(",");
-            String name = values[1];
+            String Pname = values[1];
             double price = Double.parseDouble(values[2]);
             double x = Double.parseDouble(values[3]);
             double y = Double.parseDouble(values[4]);
             String typeT = values[5];
             double hourInflation = Double.parseDouble(values[6]);
-            ParkInfo p = new ParkInfo(name,typeT,price,x,y,hourInflation);
+            ParkInfo p = new ParkInfo(Pname,typeT,price,x,y,hourInflation);
             synchronized (lock1){ // evitar problemas de concurrencia. Funciona como um lock
                 if(type.equals("rational")){
                     if(bestPark == null || bestPark.utility < p.getUtility(utility,timePark,dest)){
                         bestPark = p;
-                        System.out.println("New util best for " + name + "! " + bestPark.getUtility(utility,timePark,dest));
                     }
                 }
                 else{
@@ -199,6 +198,7 @@ public class Driver extends Agent implements Drawable {
                 msgReceived++;
                 if(msgReceived == totalParks) {
                     end = true;
+                    if(type.equals("rational"))System.out.println("New util best for " + name + "! " + bestPark.getUtility(utility,timePark,dest));
                     if(bestPark.utility < 0 && type.equals("rational")){
                         addBehaviour(new DriverExitSceneBehaviour(myAgent));
                     }
@@ -511,5 +511,10 @@ public class Driver extends Agent implements Drawable {
     @Override
     public int getY() {
         return curY;
+    }
+
+    public void setTimePark(double t){
+        timePark = t;
+        utility = timePark * maxMoney + maxDist;
     }
 }

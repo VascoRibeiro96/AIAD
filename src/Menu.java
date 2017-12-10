@@ -58,6 +58,12 @@ public class Menu {
                 exp5.setNumParks(1);
                 init.loadModel(exp5, "", false);
                 break;
+            case 6:
+                Experience6 exp6 = new Experience6();
+                exp6.setNumDrivers(10);
+                exp6.setNumParks(1);
+                init.loadModel(exp6, "", false);
+                break;
             default:
                 System.out.println("Opção Inválida!");
                 break;
