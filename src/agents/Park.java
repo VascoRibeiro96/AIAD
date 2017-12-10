@@ -63,14 +63,14 @@ public class Park extends Agent implements Drawable {
                         end = true;
                         if(type.equals("dynamic")) {
                             if(revenueStory.size() == 0){
-                                if(totalRevenue > 0 && 0.6*totalSpots >= spotsFilled){
+                                if(totalRevenue > 0 && 0.6*totalSpots <= spotsFilled){
                                     price += learnRate * (percentChange/100 - 1) * price;
                                 }
                                 else price -= learnRate * (percentChange/100 - 1) * price;
                                 if (price <= 0) price = initialPrice;
                             }
                             else {
-                                if(revenueStory.get(revenueStory.size()-1) < totalRevenue && 0.6*totalSpots >= spotsFilled){
+                                if(revenueStory.get(revenueStory.size()-1) < totalRevenue && 0.6*totalSpots <= spotsFilled){
                                     price += learnRate * (percentChange/100 - 1) * price;
                                 }
                                 else{
