@@ -183,7 +183,8 @@ public class Driver extends Agent implements Drawable {
             ParkInfo p = new ParkInfo(Pname,typeT,price,x,y,hourInflation);
             synchronized (lock1){ // evitar problemas de concurrencia. Funciona como um lock
                 if(type.equals("rational")){
-                    if(bestPark == null || bestPark.utility < p.getUtility(utility,timePark,dest)){
+                    p.getUtility(utility,timePark,dest);
+                    if(bestPark == null || bestPark.utility < p.utility){
                         bestPark = p;
                     }
                 }
