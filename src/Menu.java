@@ -1,4 +1,6 @@
 import repast.Experience1;
+import repast.Experience2;
+import repast.Experience3;
 import repast.ExperienceTest;
 import uchicago.src.sim.engine.SimInit;
 import java.util.Scanner;
@@ -16,10 +18,10 @@ public class Menu {
         do {
             System.out.println("\n\n### Parque de Estacionamento ###");
             System.out.println("\n                  =========================");
-            System.out.println("                  |     1 - Parking Model         |");
-            System.out.println("                  |     2 - Opçao 2      |");
-            System.out.println("                  |     3 - Opçao 3        |");
-            System.out.println("                  |     4 - Opçao 4       |");
+            System.out.println("                  |     1 - Experiencia 1         |");
+            System.out.println("                  |     2 - Experiencia 2         |");
+            System.out.println("                  |     3 - Experiencia 3         |");
+            System.out.println("                  |     4 - Experiencia 4         |");
             System.out.println("                  |     0 - Sair          |");
             System.out.println("                  =========================\n");
             String op ="";
@@ -28,17 +30,25 @@ public class Menu {
             opcao = reader.nextInt();
             reader.close();
             System.out.print("\n");
+            SimInit init = new SimInit();
             switch (opcao) {
                 case 1:
-                    SimInit init = new SimInit();
                     Experience1 exp = new Experience1();
                     exp.setNumDrivers(1);
                     exp.setNumParks(1);
                     init.loadModel(exp, "", false);
                     break;
                 case 2:
+                    Experience2 exp2 = new Experience2();
+                    exp2.setNumDrivers(1);
+                    exp2.setNumParks(2);
+                    init.loadModel(exp2, "", false);
                     break;
                 case 3:
+                    Experience3 exp3 = new Experience3();
+                    exp3.setNumDrivers(1);
+                    exp3.setNumParks(2);
+                    init.loadModel(exp3, "", false);
                     break;
                 case 4:
                     break;
