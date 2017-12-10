@@ -29,10 +29,10 @@ public class Menu {
         SimInit init = new SimInit();
         switch (opcao) {
             case 1:
-                Experience1 exp = new Experience1();
-                exp.setNumDrivers(1);
-                exp.setNumParks(1);
-                init.loadModel(exp, "", false);
+                Experience1 exp1 = new Experience1();
+                exp1.setNumDrivers(1);
+                exp1.setNumParks(1);
+                init.loadModel(exp1, "", false);
                 break;
             case 2:
                 Experience2 exp2 = new Experience2();
@@ -63,6 +63,18 @@ public class Menu {
                 exp6.setNumDrivers(10);
                 exp6.setNumParks(1);
                 init.loadModel(exp6, "", false);
+                break;
+            case 7:
+                Experience7 exp7 = new Experience7();
+                exp7.setNumDrivers(15);
+                exp7.setNumParks(6);
+                init.loadModel(exp7, "", false);
+                break;
+            case 8:
+                ExperienceTest exp = new ExperienceTest();
+                exp.setNumDrivers(25);
+                exp.setNumParks(10);
+                init.loadModel(exp, "", false);
                 break;
             default:
                 System.out.println("Opção Inválida!");

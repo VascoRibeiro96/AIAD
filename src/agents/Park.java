@@ -37,11 +37,13 @@ public class Park extends Agent implements Drawable {
         private final Object lock2 = new Object();
         private double totalRevenue = 0;
         private boolean close = false;
+        private int spotsFilled;
 
         private ParkBehaviour(Agent a){
             super(a);
             System.out.println(name + " opened!");
             revenue = 0;
+            spotsFilled = 0;
         }
 
         @Override
@@ -61,7 +63,7 @@ public class Park extends Agent implements Drawable {
                         end = true;
                         if(type.equals("dynamic")) {
                             if(revenueStory.size() == 0){
-                                if(totalRevenue > 0){
+                                if(totalRevenue > 0 && 0.3*totalSpots > spotsFilled){
                                     price += learnRate * (percentChange/100 - 1) * price;
                                 }
                                 else price -= learnRate * (percentChange/100 - 1) * price;
@@ -106,6 +108,7 @@ public class Park extends Agent implements Drawable {
                     reply.setPerformative(ACLMessage.AGREE);
                     reply.setContent("success");
                     spots--;
+                    spotsFilled++;
                     System.out.println("A driver parked! Current space " + spots);
                 }
                 else{

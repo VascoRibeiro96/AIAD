@@ -41,11 +41,11 @@ public class ExperienceTest extends ParkingModel {
         args[0] = "dynamic";
         args[1] = "10"; // preco por h
         args[2] = "3"; // nº total de lugares
-        args[3] = "2"; // isto e o y é melhor ser em Inteiro porcausa da grelha
-        args[4] = "5"; //
-        args[5] = "1"; // learn rate
-        args[6] = "10"; // inflação por hora em percentagem
-        args[7] = "100"; // percentagem de alteração de preço diára
+        args[3] = "2"; // x
+        args[4] = "5"; // y
+        args[5] = "0.25"; // learn rate
+        args[6] = "0.25"; // inflação por hora em percentagem
+        args[7] = "125"; // percentagem de alteração de preço diára
         return new Park(args);
     }
 
@@ -58,7 +58,7 @@ public class ExperienceTest extends ParkingModel {
         args[2] = "32"; // yi
         args[3] = "47"; // xf
         args[4] = "47"; // yf
-        args[5] = "25"; // max dinheiro a pagar por hora
+        args[5] = "20"; // max dinheiro a pagar por hora
         args[6] = "100"; // distancia maxima a andar a pé
         args[7] = "2"; // tempo de estacionamento
         return new Driver(args, getNumParks());
@@ -67,7 +67,7 @@ public class ExperienceTest extends ParkingModel {
     private void launchAgents() {
         try{
             for(int i = 0; i < getNumParks(); i++){
-                Park p = createNewPark();
+                Park p = createNewDynamicPark();
                 if(pkspc.addPark(p)){
                     parkList.add(p);
                     mainContainer.acceptNewAgent("Park " + i, p).start();
@@ -80,7 +80,7 @@ public class ExperienceTest extends ParkingModel {
                     mainContainer.acceptNewAgent("Driver " + i, d).start();
                 }
             }
-            SimulationController sm = new SimulationController(getNumParks(),getNumDrivers(),200,2);
+            SimulationController sm = new SimulationController(getNumParks(),getNumDrivers(),200,4);
             mainContainer.acceptNewAgent("SimulationController 1", sm).start();
         } catch (StaleProxyException e){
             e.printStackTrace();
