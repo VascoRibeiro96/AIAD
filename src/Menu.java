@@ -18,6 +18,10 @@ public class Menu {
         System.out.println("                  |     2 - Experiencia 2         |");
         System.out.println("                  |     3 - Experiencia 3         |");
         System.out.println("                  |     4 - Experiencia 4         |");
+        System.out.println("                  |     5 - Experiencia 5         |");
+        System.out.println("                  |     6 - Experiencia 6         |");
+        System.out.println("                  |     7 - Experiencia 7         |");
+        System.out.println("                  |     8 - Experiencia 8         |");
         System.out.println("                  |     0 - Sair          |");
         System.out.println("                  =========================\n");
         String op ="";
