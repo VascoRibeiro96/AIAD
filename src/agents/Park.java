@@ -29,6 +29,7 @@ public class Park extends Agent implements Drawable {
     private double learnRate = 0;
     private double hourInflation = 0;
     private double percentChange = 0;
+    private int upDown = 0; // 0 estado morto, 1 quer dizer que subiu, 2 desceu e 3 subiu outra vez.
 
     //ter logica do comportamento aqui?
     class ParkBehaviour extends SimpleBehaviour{
@@ -63,18 +64,26 @@ public class Park extends Agent implements Drawable {
                         end = true;
                         if(type.equals("dynamic")) {
                             if(revenueStory.size() == 0){
-                                if(totalRevenue > 0 && 0.3*totalSpots > spotsFilled){
+                                if(totalRevenue > 0 && 0.3*totalSpots > spotsFilled && upDown != 3){
                                     price += learnRate * (percentChange/100 - 1) * price;
+                                    if(upDown == 0) upDown = 1;
+                                    if(upDown == 2) upDown = 3;
                                 }
-                                else price -= learnRate * (percentChange/100 - 1) * price;
+                                else {
+                                    price -= learnRate * (percentChange/100 - 1) * price;
+                                    if(upDown == 1) upDown = 2;
+                                }
                                 if (price <= 0) price = initialPrice;
                             }
                             else {
-                                if(revenueStory.get(revenueStory.size()-1) < totalRevenue){
+                                if(revenueStory.get(revenueStory.size()-1) < totalRevenue  && upDown != 3){
                                     price += learnRate * (percentChange/100 - 1) * price;
+                                    if(upDown == 0) upDown = 1;
+                                    if(upDown == 2) upDown = 3;
                                 }
                                 else{
                                     price -= learnRate * (percentChange/100 - 1) * price;
+                                    if(upDown == 1) upDown = 2;
                                 }
                                 if (price <= 0) price = initialPrice;
                             }
