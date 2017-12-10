@@ -2,6 +2,7 @@ package repast;
 
 import agents.Driver;
 import agents.Park;
+import agents.utils.Coords;
 import uchicago.src.sim.space.Object2DGrid;
 
 public class ParkingSpace {
@@ -73,6 +74,31 @@ public class ParkingSpace {
         }
         else return false;
     }
+
+    public boolean simpleAddDriver(Driver d){
+		boolean retVal = false;
+		int x =(int) d.getStart().x;
+		int y =(int) d.getStart().y;
+		d.setStart(x,y);
+		if(getDriverAt(x,y) == null){
+			driverSpace.putObjectAt(x,y,d);
+			retVal = true;
+		}
+		return retVal;
+	}
+
+    public boolean simpleAddPark(Park p){
+		boolean retVal = false;
+		int x =(int) p.getLocation().x;
+		int y =(int) p.getLocation().y;
+		if(getParkAt(x,y) == null){
+			parkSpace.putObjectAt(x,y,p);
+			mapSpace.putObjectAt(x, y, new Integer(2));
+			p.updateLocation(x,y);
+			retVal = true;
+		}
+		return retVal;
+	}
 
 	public boolean addPark(Park p) {
 	    boolean retVal = false;
