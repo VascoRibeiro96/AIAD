@@ -35,6 +35,8 @@ public class Driver extends Agent implements Drawable {
 
 
     private ArrayList<ParkInfo> parkUtilities; // Ci - (alpha * price * time) - (beta - distance)
+    private ParkInfo park2park;
+    private ArrayList<String> parksFull = new ArrayList<>();
     private ParkInfo bestPark = null;
     private final int totalParks;
 
@@ -89,11 +91,35 @@ public class Driver extends Agent implements Drawable {
         }
     }
 
+    private void updatePark2Park(){
+        parksFull.add(park2park.name);
+        ParkInfo goodPark = null;
+        for(ParkInfo park : parkUtilities){
+            if(parksFull.contains(park.name))continue;
+            if(type.equals("rational")){
+                if(park.utility <= 0){
+                    parksFull.add(park.name);
+                    continue;
+                }
+                if(goodPark == null || goodPark.utility < park.getUtility(utility,timePark,dest))
+                    goodPark = park;
+            }
+            else{
+                park.distanceTo = park.location.calculateDistance(new Coords(curX,curY));
+                if(goodPark == null || goodPark.distanceTo > park.distanceTo)
+                    goodPark = park;
+            }
+        }
+        if(goodPark == null) return;
+        park2park = goodPark;
+    }
+
     class DriverQueryBehaviour extends SimpleBehaviour {
         private boolean end = false;
 
         private DriverQueryBehaviour(Agent a) {
             super(a);
+            parksFull = new ArrayList<>();
         }
 
         @Override
@@ -207,8 +233,14 @@ public class Driver extends Agent implements Drawable {
                 updateCurCoords(cur,des);
             }
             else {
-                parkRequest(ACLMessage.REQUEST,"park", finalPark);
-                end = true;
+                if(type.equals("explorer") && finalPark.utility < 0)  {
+                    updatePark2Park();
+                    finalPark = park2park;
+                }
+                else {
+                    parkRequest(ACLMessage.REQUEST,"park", finalPark);
+                    end = true;
+                }
             }
         }
 
@@ -259,11 +291,10 @@ public class Driver extends Agent implements Drawable {
 
     class DriverParkResponseBehaviour extends SimpleBehaviour{
         private boolean end = false;
-        private ParkInfo park2park = bestPark;
-        private ArrayList<String> parksFull = new ArrayList<>();
 
         private DriverParkResponseBehaviour(Agent a){
             super(a);
+            park2park = bestPark;
         }
 
         @Override
@@ -291,29 +322,6 @@ public class Driver extends Agent implements Drawable {
                 msg = myAgent.receive();
             }
             block();
-        }
-
-        private void updatePark2Park(){
-            parksFull.add(park2park.name);
-            ParkInfo goodPark = null;
-            for(ParkInfo park : parkUtilities){
-                if(parksFull.contains(park.name))continue;
-                if(type.equals("rational")){
-                    if(park.utility <= 0){
-                        parksFull.add(park.name);
-                        continue;
-                    }
-                    if(goodPark == null || goodPark.utility < park.getUtility(utility,timePark,dest))
-                        goodPark = park;
-                }
-                else{
-                    park.distanceTo = park.location.calculateDistance(new Coords(curX,curY));
-                    if(goodPark == null || goodPark.distanceTo > park.distanceTo)
-                        goodPark = park;
-                }
-            }
-            if(goodPark == null) return;
-            park2park = goodPark;
         }
 
         private void parkDriver(){
