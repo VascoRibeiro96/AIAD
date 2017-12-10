@@ -36,6 +36,7 @@ public class ParkingModel extends Repast3Launcher {
     private int worldXSize = WORLDXSIZE;
     private int worldYSize = WORLDYSIZE;
     private int agentLifeSpan = AGENT_LIFESPAN;
+    private int displayParkChart = 1;
     protected ArrayList<Park> parkList;
     protected ArrayList<Driver> driverList;
 
@@ -54,7 +55,7 @@ public class ParkingModel extends Repast3Launcher {
         }
 
         public double getSValue() {
-            return (double)pkspc.getTotalMoney();
+            return (double)pkspc.getTotalMoney("Park " + displayParkChart);
         }
     }
 
@@ -112,7 +113,7 @@ public class ParkingModel extends Repast3Launcher {
 
     @Override
     public String[] getInitParam() {
-        return new String[]{ "NumParks", "NumDrivers", "WorldXSize", "WorldYSize", "AgentLifespan"};
+        return new String[]{ "NumParks", "NumDrivers", "WorldXSize", "WorldYSize", "AgentLifespan", "DisplayParkChart"};
     }
 
     @Override
@@ -191,4 +192,11 @@ public class ParkingModel extends Repast3Launcher {
         this.worldYSize = worldYSize;
     }
 
+    public int getDisplayParkChart() {
+        return displayParkChart;
+    }
+
+    public void setDisplayParkChart(int displayParkChart) {
+        this.displayParkChart = displayParkChart;
+    }
 }
