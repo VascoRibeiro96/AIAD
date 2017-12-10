@@ -26,7 +26,7 @@ import uchicago.src.sim.analysis.Sequence;
 
 public class ParkingModel extends Repast3Launcher {
     private static final int NUMPARKS = 10;
-    private static final int NUMDRIVERS = 25; // maybe moar idk xD
+    private static final int NUMDRIVERS = 25;
     private static final int WORLDXSIZE = 100;
     private static final int WORLDYSIZE = 100;
     private static final int AGENT_LIFESPAN = 30;
@@ -103,7 +103,6 @@ public class ParkingModel extends Repast3Launcher {
         displaySurf.addDisplayableProbeable(displayMap, "Map");
         displaySurf.addDisplayableProbeable(displayDrivers, "Drivers");
         amountOfMoneyInPark.addSequence("Money In Park", new moneyInPark());
-        //  agentWealthDistribution.createHistogramItem("Agent Wealth",parkList,new agentMoney());
     }
 
     @Override

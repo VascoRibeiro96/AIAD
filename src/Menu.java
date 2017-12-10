@@ -1,7 +1,4 @@
-import agents.Experiences.Experience1;
-import agents.Experiences.Experience2;
-import agents.Experiences.Experience3;
-import agents.Experiences.Experience4;
+import agents.Experiences.*;
 import uchicago.src.sim.engine.SimInit;
 import java.util.Scanner;
 
@@ -54,6 +51,12 @@ public class Menu {
                 exp4.setNumDrivers(4);
                 exp4.setNumParks(2);
                 init.loadModel(exp4, "", false);
+                break;
+            case 5:
+                Experience5 exp5 = new Experience5();
+                exp5.setNumDrivers(1);
+                exp5.setNumParks(1);
+                init.loadModel(exp5, "", false);
                 break;
             default:
                 System.out.println("Opção Inválida!");

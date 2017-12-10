@@ -44,7 +44,7 @@ public class ExperienceTest extends ParkingModel {
         args[3] = "2"; // isto e o y é melhor ser em Inteiro porcausa da grelha
         args[4] = "5"; //
         args[5] = "1"; // learn rate
-        args[6] = "10"; // inflação por hora
+        args[6] = "10"; // inflação por hora em percentagem
         args[7] = "100"; // percentagem de alteração de preço diára
         return new Park(args);
     }

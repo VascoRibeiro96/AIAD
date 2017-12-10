@@ -178,9 +178,9 @@ public class Driver extends Agent implements Drawable {
             double price = Double.parseDouble(values[2]);
             double x = Double.parseDouble(values[3]);
             double y = Double.parseDouble(values[4]);
-            String type = values[5];
+            String typeT = values[5];
             double hourInflation = Double.parseDouble(values[6]);
-            ParkInfo p = new ParkInfo(name,type,price,x,y,hourInflation);
+            ParkInfo p = new ParkInfo(name,typeT,price,x,y,hourInflation);
             synchronized (lock1){ // evitar problemas de concurrencia. Funciona como um lock
                 if(type.equals("rational")){
                     if(bestPark == null || bestPark.utility < p.getUtility(utility,timePark,dest)){
@@ -408,6 +408,8 @@ public class Driver extends Agent implements Drawable {
                         curimageFile = new File("icons/bluecar.png");
                         bestPark = null; // se calhar isto até nem era preciso
                         parkUtilities = new ArrayList<>();
+                        park2park = null;
+                        parksFull = new ArrayList<>();
                         addBehaviour(new DriverQueryBehaviour(myAgent));
                         addBehaviour(new DriverReceiveInfoBehaviour(myAgent));
                     }

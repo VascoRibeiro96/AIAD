@@ -11,6 +11,7 @@ import repast.ParkingSpace;
 import sajas.core.Runtime;
 
 // experiencia para testar se o parque 2 enche por ser mais barato e se o outro carro vai para o outro parque
+// nesta experiência é possível mudar o nº de carros
 public class Experience4 extends ParkingModel {
 
     @Override

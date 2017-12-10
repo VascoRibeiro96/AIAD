@@ -62,17 +62,19 @@ public class Park extends Agent implements Drawable {
                         if(type.equals("dynamic")) {
                             if(revenueStory.size() == 0){
                                 if(totalRevenue > 0){
-                                    price += price * learnRate * (percentChange/100 - 1);
+                                    price += learnRate * (percentChange/100 - 1) * price;
                                 }
-                                else price -= price * learnRate * (percentChange/100 - 1);
+                                else price -= learnRate * (percentChange/100 - 1) * price;
+                                if (price <= 0) price = initialPrice;
                             }
                             else {
                                 if(revenueStory.get(revenueStory.size()-1) < totalRevenue){
-                                    price += price * learnRate * (percentChange/100 - 1);
+                                    price += learnRate * (percentChange/100 - 1) * price;
                                 }
                                 else{
-                                    price -= price * learnRate * (percentChange/100 - 1);
+                                    price -= learnRate * (percentChange/100 - 1) * price;
                                 }
+                                if (price <= 0) price = initialPrice;
                             }
                         }
                         revenueStory.add(totalRevenue);
@@ -120,7 +122,20 @@ public class Park extends Agent implements Drawable {
             synchronized (lock2) {
                 spots++;
                 String[] splitMsg = msg.getContent().split(",");
-                totalRevenue += Double.parseDouble(splitMsg[1]) * price;
+                double timePark =Double.parseDouble(splitMsg[1]);
+                double totalPrice = 0;
+                double priceInflated = 0;
+                for(int i = 0; i < timePark; i++){
+                    if(i==0) {
+                        totalPrice = price;
+                        priceInflated = price;
+                    }
+                    else {
+                        priceInflated += priceInflated * hourInflation;
+                        totalPrice += priceInflated;
+                    }
+                }
+                totalRevenue +=  totalPrice;
                 revenue = totalRevenue;
                 System.out.println(name + " total revenue of the day increased to " + totalRevenue);
             }
