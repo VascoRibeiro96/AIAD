@@ -1,7 +1,6 @@
-import repast.Experience1;
-import repast.Experience2;
-import repast.Experience3;
-import repast.ExperienceTest;
+import agents.Experiences.Experience1;
+import agents.Experiences.Experience2;
+import agents.Experiences.Experience3;
 import uchicago.src.sim.engine.SimInit;
 import java.util.Scanner;
 
