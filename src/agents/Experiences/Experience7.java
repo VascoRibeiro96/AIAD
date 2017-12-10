@@ -28,7 +28,7 @@ public class Experience7 extends ParkingModel {
         args[0] = "dynamic";
         args[1] = "10";
         args[2] = "5";
-        args[3] = "35";
+        args[3] = "15";
         args[4] = "50";
         args[5] = "1";
         args[6] = "0.0";
@@ -42,7 +42,7 @@ public class Experience7 extends ParkingModel {
         args[1] = "10";
         args[2] = "5";
         args[3] = "50";
-        args[4] = "35";
+        args[4] = "15";
         args[5] = "0.25";
         args[6] = "0.0";
         args[7] = "200";
@@ -54,7 +54,7 @@ public class Experience7 extends ParkingModel {
         args[0] = "dynamic";
         args[1] = "10";
         args[2] = "5";
-        args[3] = "65";
+        args[3] = "85";
         args[4] = "50";
         args[5] = "0.25";
         args[6] = "0.1";
@@ -65,23 +65,23 @@ public class Experience7 extends ParkingModel {
     private Park createNewDynamicPark4(){
         Object[] args = new Object[8];
         args[0] = "dynamic";
-        args[1] = "20";
+        args[1] = "15";
         args[2] = "5";
         args[3] = "50";
-        args[4] = "65";
+        args[4] = "85";
         args[5] = "0.25";
-        args[6] = "-0.25";
-        args[7] = "125";
+        args[6] = "-0.4";
+        args[7] = "115";
         return new Park(args);
     }
 
     private Park createNewPark1(){
         Object[] args = new Object[5];
         args[0] = "static";
-        args[1] = "10"; // preco por h
+        args[1] = "12"; // preco por h
         args[2] = "5"; // nº total de lugares
-        args[3] = "60"; // isto e o y é melhor ser em Inteiro porcausa da grelha
-        args[4] = "55"; //
+        args[3] = "75"; // isto e o y é melhor ser em Inteiro porcausa da grelha
+        args[4] = "58"; //
         return new Park(args);
     }
 
@@ -92,9 +92,9 @@ public class Experience7 extends ParkingModel {
         Object[] args = new Object[5];
         args[0] = "static";
         args[1] = "5"; // preco por h
-        args[2] = "5"; // nº total de lugares
-        args[3] = "55"; // isto e o y é melhor ser em Inteiro porcausa da grelha
-        args[4] = "60"; //
+        args[2] = "2"; // nº total de lugares
+        args[3] = "45"; // isto e o y é melhor ser em Inteiro porcausa da grelha
+        args[4] = "80"; //
         return new Park(args);
     }
 
@@ -103,12 +103,12 @@ public class Experience7 extends ParkingModel {
         // explorer, 49.3, 49.4, 65.12, 12.2, 25, 100, 2
         Object[] args = new Object[8];
         args[0] = "rational"; // tipo
-        args[1] = "25"; //xi
-        args[2] = "0"; // yi
+        args[1] = "0"; //xi
+        args[2] = "50"; // yi
         args[3] = "50"; // xf
         args[4] = "50"; // yf
         args[5] = "15"; // max dinheiro a pagar por hora
-        args[6] = "3"; // distancia maxima a andar a pé
+        args[6] = "25"; // distancia maxima a andar a pé
         args[7] = "1"; // tempo de estacionamento
         return new Driver(args, getNumParks());
     }
